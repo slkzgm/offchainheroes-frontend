@@ -22,6 +22,14 @@ Ce dépôt contient le frontend Next.js (App Router) de la console Offchain Hero
 - Pas de CSS custom tant que Tailwind/Shadcn couvre le besoin.
 - Privilégier les composants headless Shadcn pour la cohérence UX.
 
+### Principes de design
+
+- Remplacer les emojis par des icônes cohérentes (Lucide/Shadcn) pour conserver une esthétique premium.
+- Gestion des espacements : chaque section doit respirer sans gaspiller l’espace ; ajuster padding/marges pour un alignement précis.
+- Style général : objectif « spa suisse » — sobre, minimaliste, haut de gamme ; quelque chose qu’un pro paierait des milliers $/mois et qui ferait sourire Steve Jobs.
+- Palette restreinte : s’en tenir à un jeu de couleurs cohérent (base Zinc shadcn) et n’introduire une couleur que si elle a une raison fonctionnelle claire.
+- Responsive by default : chaque composant doit rester élégant sur desktop **et** mobile, sans rupture visuelle.
+
 ### API & React Query
 
 - `src/lib/api.ts` centralise les appels REST (`/auth`, `/bot`, `/user`).
