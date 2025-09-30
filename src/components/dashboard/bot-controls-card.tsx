@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import type { BotConfigurationResponse } from '@/lib/api'
-import { formatDate } from '@/components/dashboard/dashboard-utils'
+import { formatDate } from '@/lib/format'
 import { Loader2, RotateCcw } from 'lucide-react'
 
 interface BotControlsCardProps {
@@ -28,7 +28,7 @@ export function BotControlsCard({
   onToggleAutoClaim,
   onToggleAutoSell,
   onTriggerRun,
-}: BotControlsCardProps): JSX.Element {
+}: BotControlsCardProps) {
   return (
     <Card>
       <CardHeader>

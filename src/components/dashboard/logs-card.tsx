@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { BotLogEntry } from '@/lib/api'
-import { formatDate, formatRelative } from '@/components/dashboard/dashboard-utils'
+import { formatDate, formatRelative } from '@/lib/format'
 import { AlertCircle, Loader2, RotateCcw } from 'lucide-react'
 
 interface LogsCardProps {
@@ -22,7 +22,7 @@ interface LogsCardProps {
   onRefresh: () => void
 }
 
-export function LogsCard({ logs, isLoading, errorMessage, onRefresh }: LogsCardProps): JSX.Element {
+export function LogsCard({ logs, isLoading, errorMessage, onRefresh }: LogsCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

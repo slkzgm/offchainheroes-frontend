@@ -1,7 +1,7 @@
 // path: src/components/dashboard/bot-dashboard.tsx
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSession } from '@/hooks/use-session'
@@ -18,14 +18,14 @@ import {
   type UserOverviewResponse,
 } from '@/lib/api'
 import { toast } from 'sonner'
-import { AccountOverviewCard } from '@/components/dashboard/account-overview-card'
 import { RuntimeSnapshotCard, type RuntimeStat } from '@/components/dashboard/runtime-snapshot-card'
 import { BotControlsCard } from '@/components/dashboard/bot-controls-card'
 import { LiveStateCard, type LiveStateHeroGroup } from '@/components/dashboard/live-state-card'
 import { LogsCard } from '@/components/dashboard/logs-card'
-import { formatDate, formatRelative, getErrorMessage } from '@/components/dashboard/dashboard-utils'
+import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
+import { BotSessionCard } from '@/components/dashboard/bot-session-card'
 
-export default function BotDashboard(): JSX.Element {
+export default function BotDashboard() {
   const { session, isAuthenticated, isLoading: sessionLoading } = useSession()
   const queryClient = useQueryClient()
 
@@ -86,8 +86,7 @@ export default function BotDashboard(): JSX.Element {
   const logs = logsQuery.data ?? []
 
   const sessionStatus = overview?.bot
-
-  const isLoading = overviewQuery.isLoading || configQuery.isLoading
+  const isSessionLoading = overviewQuery.isLoading || configQuery.isLoading
 
   const heroGroups: LiveStateHeroGroup[] = useMemo(() => {
     if (!state?.heroes) return []
@@ -125,11 +124,9 @@ export default function BotDashboard(): JSX.Element {
     },
   ]
 
-  const accountError = overviewQuery.isError
-    ? getErrorMessage(overviewQuery.error)
-    : configQuery.isError
-      ? getErrorMessage(configQuery.error)
-      : null
+  const handleSessionUpdated = useCallback(async () => {
+    await Promise.allSettled([overviewQuery.refetch(), configQuery.refetch(), stateQuery.refetch()])
+  }, [configQuery, overviewQuery, stateQuery])
 
   if (sessionLoading) {
     return (
@@ -157,13 +154,12 @@ export default function BotDashboard(): JSX.Element {
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-        <AccountOverviewCard
-          overview={overview}
-          sessionStatus={sessionStatus}
+      <div className="grid gap-6 xl:grid-cols-[1.6fr,1fr]">
+        <BotSessionCard
+          status={sessionStatus}
           config={config}
-          isLoading={isLoading}
-          errorMessage={accountError}
+          isLoading={isSessionLoading}
+          onSessionUpdated={handleSessionUpdated}
         />
         <div className="space-y-6">
           <RuntimeSnapshotCard stats={runtimeStats} />

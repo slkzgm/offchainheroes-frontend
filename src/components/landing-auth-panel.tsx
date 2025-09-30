@@ -16,7 +16,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback
 }
 
-export default function LandingAuthPanel(): JSX.Element {
+export default function LandingAuthPanel() {
   const router = useRouter()
   const { session, isAuthenticated, refetch: refetchSession, isLoading: sessionLoading } = useSession()
   const { login, logout: logoutWallet } = useLoginWithAbstract()

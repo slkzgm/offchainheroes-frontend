@@ -13,7 +13,7 @@ interface RuntimeSnapshotCardProps {
   stats: RuntimeStat[]
 }
 
-export function RuntimeSnapshotCard({ stats }: RuntimeSnapshotCardProps): JSX.Element {
+export function RuntimeSnapshotCard({ stats }: RuntimeSnapshotCardProps) {
   return (
     <Card>
       <CardHeader>

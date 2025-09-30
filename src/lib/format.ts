@@ -1,4 +1,4 @@
-// path: src/components/dashboard/dashboard-utils.ts
+// path: src/lib/format.ts
 export function formatDate(value?: string | null): string {
   if (!value) return '—'
   const date = new Date(value)
@@ -35,4 +35,16 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message
   if (typeof error === 'string') return error
   return 'Unknown error'
+}
+
+export function truncateAddress(value?: string | null, size = 4): string {
+  if (!value) return '—'
+  const normalized = value.trim()
+  if (normalized.length <= size * 2) return normalized
+  return `${normalized.slice(0, size + 2)}…${normalized.slice(-size)}`
+}
+
+export function getAvatarUrl(avatarId?: number | null): string | undefined {
+  if (avatarId === undefined || avatarId === null) return undefined
+  return `https://och.slkzgm.com/api/heroes/images/${avatarId}.png`
 }

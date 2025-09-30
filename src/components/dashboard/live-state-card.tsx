@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { BotHeroState, BotStateResponse } from '@/lib/api'
-import { formatDate, formatDuration, formatRelative } from '@/components/dashboard/dashboard-utils'
+import { formatDate, formatDuration, formatRelative } from '@/lib/format'
 import { AlertCircle, RotateCcw } from 'lucide-react'
 
 export interface LiveStateHeroGroup {
@@ -22,7 +22,7 @@ interface LiveStateCardProps {
   onRefresh: () => void
 }
 
-function renderBadges(record?: Record<string, unknown> | null): JSX.Element {
+function renderBadges(record?: Record<string, unknown> | null) {
   if (!record) {
     return <span className="text-xs text-muted-foreground">—</span>
   }
@@ -43,7 +43,7 @@ function renderBadges(record?: Record<string, unknown> | null): JSX.Element {
   )
 }
 
-export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: LiveStateCardProps): JSX.Element {
+export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: LiveStateCardProps) {
   const hasState = Boolean(state)
   const capturedAt = useMemo(() => (state?.timestamp ? formatRelative(state.timestamp) : '—'), [state?.timestamp])
 
