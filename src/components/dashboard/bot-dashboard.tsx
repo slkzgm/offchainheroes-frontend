@@ -3,6 +3,22 @@
 import { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AlertCircle, CalendarClock, CheckCircle2, Loader2, RotateCcw } from 'lucide-react'
 import { useAuthTokens } from '@/hooks/use-auth-tokens'
 import {
   getUserOverview,
@@ -56,11 +72,25 @@ function getErrorMessage(error: unknown): string {
   return 'Unknown error'
 }
 
-function formatRecord(record?: Record<string, number> | Record<string, unknown> | null): string {
-  if (!record || Object.keys(record).length === 0) return '—'
-  return Object.entries(record)
-    .map(([key, value]) => `${key}=${value as string | number}`)
-    .join(', ')
+function renderBadges(record?: Record<string, unknown> | null): JSX.Element {
+  if (!record) {
+    return <span className="text-xs text-muted-foreground">—</span>
+  }
+
+  const entries = Object.entries(record).filter(([, value]) => value !== undefined && value !== null)
+  if (!entries.length) {
+    return <span className="text-xs text-muted-foreground">—</span>
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {entries.map(([key, value]) => (
+        <Badge key={key} variant="outline" className="font-normal">
+          {key}: {String(value)}
+        </Badge>
+      ))}
+    </div>
+  )
 }
 
 export default function BotDashboard(): JSX.Element {
@@ -141,199 +171,338 @@ export default function BotDashboard(): JSX.Element {
 
   if (!tokens || !accessToken) {
     return (
-      <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-        Connect and sign in to load bot data.
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Connect to view your dashboard</CardTitle>
+          <CardDescription>
+            Authenticate on the landing page to unlock configuration, live state, and logs.
+          </CardDescription>
+        </CardHeader>
+      </Card>
     )
   }
 
-  if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading bot data…</div>
-  }
+  const heroTabs = heroGroups?.map((group) => group) ?? []
 
-  if (overviewQuery.isError) {
-    return <div className="text-sm text-red-600">Failed to load overview: {overviewQuery.error?.message}</div>
-  }
+  const isErrored = overviewQuery.isError || configQuery.isError
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-md border p-4">
-        <h2 className="text-base font-semibold">Account</h2>
-        <div className="mt-2 space-y-1 text-sm">
-          <div>Address: {overview?.user.address ?? '—'}</div>
-          <div>User ID: {overview?.user.userId ?? '—'}</div>
-          <div>
-            Game session: {sessionStatus?.hasCookie ? 'linked' : 'missing'}
-            {sessionStatus?.expiresAt ? ` — expires ${formatDate(sessionStatus.expiresAt)}` : ''}
-          </div>
-          {sessionStatus?.renewSoon && (
-            <div className="text-amber-600">Session renewal recommended soon.</div>
-          )}
-          {overview?.sessionUser && (
-            <div className="pt-2">
-              <div className="font-medium">Game profile</div>
-              <div className="text-xs text-muted-foreground">
-                {overview.sessionUser.username ?? overview.sessionUser.publicKey ?? '—'}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Discord: {overview.sessionUser.discordHandle ?? overview.sessionUser.discordId ?? '—'}
+    <div className="space-y-8">
+      <div className="grid gap-6 xl:grid-cols-3">
+        <Card className="xl:col-span-2">
+          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                Account overview
+                {sessionStatus?.hasCookie ? (
+                  <Badge variant="outline" className="gap-1 text-xs font-medium">
+                    <CheckCircle2 className="h-3 w-3" /> Linked
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="gap-1 text-xs font-medium">
+                    <AlertCircle className="h-3 w-3" /> Cookie missing
+                  </Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                Wallet {overview?.user.address ?? '—'} · ID {overview?.user.userId ?? '—'}
+              </CardDescription>
+            </div>
+            {sessionStatus?.renewSoon && (
+              <Badge variant="secondary" className="gap-1 text-xs font-medium">
+                <CalendarClock className="h-3 w-3" /> Renew session soon
+              </Badge>
+            )}
+          </CardHeader>
+          <CardContent className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-2 text-sm">
+              <div className="text-xs uppercase text-muted-foreground">Session</div>
+              <div className="rounded-lg border border-border/60 bg-background/50 p-4">
+                <div>Game cookie: {sessionStatus?.hasCookie ? 'Linked' : 'Missing'}</div>
+                <div>
+                  Expires:{' '}
+                  {sessionStatus?.expiresAt ? formatDate(sessionStatus.expiresAt) : '—'}{' '}
+                  <span className="text-muted-foreground">
+                    {sessionStatus?.expiresAt ? `(${formatRelative(sessionStatus.expiresAt)})` : ''}
+                  </span>
+                </div>
+                <Separator className="my-3" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CalendarClock className="h-3 w-3" /> Next check:{' '}
+                  {config?.nextCheck?.nextCheckAt ? (
+                    <span>
+                      {formatDate(config.nextCheck.nextCheckAt)} · {formatRelative(config.nextCheck.nextCheckAt)}
+                    </span>
+                  ) : (
+                    'not scheduled'
+                  )}
+                </div>
+                {config?.nextCheck?.notes?.length ? (
+                  <div className="pt-2 text-xs text-muted-foreground">
+                    {config.nextCheck.notes.map((note) => (
+                      <div key={note}>• {note}</div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
+            <div className="space-y-2 text-sm">
+              <div className="text-xs uppercase text-muted-foreground">Game profile</div>
+              <div className="space-y-1 rounded-lg border border-border/60 bg-background/50 p-4">
+                <div>Username: {overview?.sessionUser?.username ?? '—'}</div>
+                <div>Public key: {overview?.sessionUser?.publicKey ?? '—'}</div>
+                <div>Discord: {overview?.sessionUser?.discordHandle ?? overview?.sessionUser?.discordId ?? '—'}</div>
+                <div>Last sign-in: {formatDate(overview?.sessionUser?.lastSignedIn)}</div>
+              </div>
+            </div>
+          </CardContent>
+          {isErrored && (
+            <CardFooter>
+              <Badge variant="destructive" className="gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {overviewQuery.isError
+                  ? getErrorMessage(overviewQuery.error)
+                  : getErrorMessage(configQuery.error)}
+              </Badge>
+            </CardFooter>
           )}
-        </div>
-      </section>
+        </Card>
 
-      <section className="rounded-md border p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Configuration</h2>
-          <Button
-            variant="secondary"
-            disabled={!config?.isEnabled || manualRunMutation.isPending}
-            onClick={() => manualRunMutation.mutate()}
-          >
-            Trigger manual run
-          </Button>
-        </div>
-        {configQuery.isError ? (
-          <div className="text-sm text-red-600">Failed to load configuration: {configQuery.error?.message}</div>
-        ) : (
-          <div className="space-y-2 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
+        <Card>
+          <CardHeader className="flex flex-col gap-3">
+            <CardTitle>Bot controls</CardTitle>
+            <CardDescription>Enable automation and manage helper routines.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="bot-enabled" className="text-sm font-medium">
+                  Automation enabled
+                </Label>
+                <p className="text-xs text-muted-foreground">Pause or resume worker execution.</p>
+              </div>
+              <Switch
+                id="bot-enabled"
                 checked={config?.isEnabled ?? false}
-                onChange={(event) =>
-                  updateConfigMutation.mutate({ isEnabled: event.currentTarget.checked })
-                }
-                disabled={updateConfigMutation.isPending}
+                onCheckedChange={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
+                disabled={updateConfigMutation.isPending || isLoading || configQuery.isError}
               />
-              Enable bot
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={config?.autoClaimBait ?? false}
-                onChange={(event) =>
-                  updateConfigMutation.mutate({ autoClaimBait: event.currentTarget.checked })
-                }
-                disabled={updateConfigMutation.isPending}
-              />
-              Auto-claim bait
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={config?.autoSellFish ?? false}
-                onChange={(event) =>
-                  updateConfigMutation.mutate({ autoSellFish: event.currentTarget.checked })
-                }
-                disabled={updateConfigMutation.isPending}
-              />
-              Auto-sell fish
-            </label>
-            <div className="pt-2 text-xs text-muted-foreground">
+            </div>
+            <Separator />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <Label htmlFor="bot-auto-claim" className="text-sm font-medium">
+                    Auto-claim bait
+                  </Label>
+                  <p className="text-xs text-muted-foreground">Claim bait stashes during daily reset.</p>
+                </div>
+                <Switch
+                  id="bot-auto-claim"
+                  checked={config?.autoClaimBait ?? false}
+                  onCheckedChange={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
+                  disabled={updateConfigMutation.isPending || isLoading || configQuery.isError}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <Label htmlFor="bot-auto-sell" className="text-sm font-medium">
+                    Auto-sell fish
+                  </Label>
+                  <p className="text-xs text-muted-foreground">Automatically liquidate fish based on strategy.</p>
+                </div>
+                <Switch
+                  id="bot-auto-sell"
+                  checked={config?.autoSellFish ?? false}
+                  onCheckedChange={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
+                  disabled={updateConfigMutation.isPending || isLoading || configQuery.isError}
+                />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex items-center justify-between">
+            <div className="space-y-1 text-xs text-muted-foreground">
               <div>Last success: {formatDate(config?.lastSuccessAt)}</div>
               <div>Last error: {formatDate(config?.lastErrorAt)}</div>
-              <div>
-                Next check:{' '}
-                {config?.nextCheck?.nextCheckAt ? (
-                  <>
-                    {formatDate(config.nextCheck.nextCheckAt)} ({formatRelative(config.nextCheck.nextCheckAt)})
-                  </>
-                ) : (
-                  'not scheduled'
-                )}
-              </div>
-              {config?.nextCheck?.notes?.length ? (
-                <div>Notes: {config.nextCheck.notes.join(', ')}</div>
-              ) : null}
             </div>
-          </div>
-        )}
-      </section>
-
-      <section className="rounded-md border p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Live state</h2>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => stateQuery.refetch()}>
-              Refresh state
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={!config?.isEnabled || manualRunMutation.isPending}
+              onClick={() => manualRunMutation.mutate()}
+              className="gap-2"
+            >
+              {manualRunMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+              Trigger run
             </Button>
-          </div>
-        </div>
-        {stateQuery.isError ? (
-          <div className="text-sm text-red-600">Failed to load live state: {stateQuery.error?.message}</div>
-        ) : state ? (
-          <div className="space-y-2 text-sm">
-            <div>Snapshot: {formatDate(state.timestamp)}</div>
+          </CardFooter>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="order-2 lg:order-1">
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
-              Bait balance:{' '}
-              {formatRecord(state.bait?.balances as Record<string, number> | undefined)}
+              <CardTitle>Live state</CardTitle>
+              <CardDescription>
+                Snapshot captured {state?.timestamp ? formatRelative(state.timestamp) : '—'}.
+              </CardDescription>
             </div>
-            <div>Claimable: {formatRecord(state.bait?.claimable as Record<string, number> | undefined)}</div>
-            <div>Marbles: {state.marbles?.balance ?? '—'}</div>
-            <div>Fish (regular): {formatRecord(state.fish?.regular ?? undefined)}</div>
-            <div>Fish (daily deals): {formatRecord(state.fish?.dailyDeals ?? undefined)}</div>
-            <div>Fish sold today: {formatRecord(state.fish?.dealsSoldToday ?? undefined)}</div>
-            {heroGroups?.map((group) => (
-              <div key={group.label}>
-                <div className="font-medium">{group.label} heroes ({group.entries.length})</div>
-                <div className="ml-4 space-y-1 text-xs text-muted-foreground">
-                  {group.entries.length === 0 && <div>None</div>}
-                  {group.entries.map((hero) => (
-                    <div key={hero.id}>
-                      <div>
-                        #{hero.id} — energy {hero.energyEstimated ?? hero.energy ?? '—'} / {hero.maxEnergy ?? '—'}
-                        {hero.activeSession?.matureAt && (
-                          <span>
-                            {' '}
-                            (matures {formatRelative(hero.activeSession.matureAt)})
-                          </span>
+            <Button variant="outline" size="sm" onClick={() => stateQuery.refetch()} className="gap-2">
+              <RotateCcw className="h-4 w-4" /> Refresh
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-5 text-sm">
+            {stateQuery.isError ? (
+              <div className="flex items-center gap-2 text-sm text-red-500">
+                <AlertCircle className="h-4 w-4" /> {stateQuery.error?.message}
+              </div>
+            ) : isLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading live data…
+              </div>
+            ) : state ? (
+              <Tabs defaultValue="resources" className="space-y-4">
+                <TabsList className="w-full justify-start">
+                  <TabsTrigger value="resources">Resources</TabsTrigger>
+                  <TabsTrigger value="heroes">Heroes</TabsTrigger>
+                </TabsList>
+                <TabsContent value="resources" className="space-y-4">
+                  <div>
+                    <div className="text-xs uppercase text-muted-foreground">Bait balances</div>
+                    {renderBadges(state.bait?.balances ?? null)}
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase text-muted-foreground">Claimable bait</div>
+                    {renderBadges(state.bait?.claimable ?? null)}
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                      <div className="text-xs text-muted-foreground">Marbles</div>
+                      <div className="text-lg font-semibold">{state.marbles?.balance ?? '—'}</div>
+                    </div>
+                    <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                      <div className="text-xs text-muted-foreground">Marble week</div>
+                      <div className="text-lg font-semibold">{state.marbles?.week ?? '—'}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase text-muted-foreground">Fish inventory</div>
+                    {renderBadges(state.fish?.regular ?? null)}
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase text-muted-foreground">Daily deals</div>
+                    {renderBadges(state.fish?.dailyDeals ?? null)}
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase text-muted-foreground">Sold today</div>
+                    {renderBadges(state.fish?.dealsSoldToday ?? null)}
+                  </div>
+                </TabsContent>
+                <TabsContent value="heroes" className="space-y-4">
+                  {heroTabs.length ? (
+                    heroTabs.map((group) => (
+                      <div key={group.key} className="space-y-3">
+                        <div className="text-xs uppercase text-muted-foreground">{group.label}</div>
+                        {group.entries.length === 0 ? (
+                          <div className="text-xs text-muted-foreground">No heroes in this state.</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {group.entries.map((hero) => (
+                              <div
+                                key={hero.id}
+                                className="rounded-lg border border-border/50 bg-background/50 p-3 text-xs text-muted-foreground"
+                              >
+                                <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
+                                  Hero #{hero.id}
+                                  <Badge variant="outline" className="text-xs font-normal">
+                                    Energy {hero.energyEstimated ?? hero.energy ?? '—'} / {hero.maxEnergy ?? '—'}
+                                  </Badge>
+                                </div>
+                                {hero.activeSession ? (
+                                  <div className="mt-2 space-y-1">
+                                    <div>Elapsed {formatDuration(hero.activeSession.elapsedSeconds)}</div>
+                                    <div>
+                                      Matures {hero.activeSession.matureAt ? formatRelative(hero.activeSession.matureAt) : '—'}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      <Badge variant="outline">Zone {hero.activeSession.zoneId ?? '—'}</Badge>
+                                      <Badge variant="outline">Bait {hero.activeSession.bait ?? 'none'}</Badge>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="mt-2">Last energy update {formatDate(hero.energyUpdated)}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
-                      {hero.activeSession && (
-                        <div className="text-[11px] text-muted-foreground">
-                          Elapsed {formatDuration(hero.activeSession.elapsedSeconds)} · Zone{' '}
-                          {hero.activeSession.zoneId ?? '—'} · Bait{' '}
-                          {hero.activeSession.bait ? hero.activeSession.bait : 'none'}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-sm text-muted-foreground">No live data available.</div>
-        )}
-      </section>
+                    ))
+                  ) : (
+                    <div className="text-xs text-muted-foreground">No hero data available.</div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <div className="text-sm text-muted-foreground">No live data available.</div>
+            )}
+          </CardContent>
+        </Card>
 
-      <section className="rounded-md border p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Recent logs</h2>
-          <Button variant="outline" size="sm" onClick={() => logsQuery.refetch()}>
-            Refresh logs
-          </Button>
-        </div>
-        {logsQuery.isError ? (
-          <div className="text-sm text-red-600">Failed to load logs: {logsQuery.error?.message}</div>
-        ) : logs.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No logs yet.</div>
-        ) : (
-          <ul className="space-y-2 text-sm">
-            {logs.map((log) => (
-              <li key={log.id} className="rounded border p-2">
-                <div className="text-xs text-muted-foreground">{formatDate(log.occurredAt)}</div>
-                <div className="font-medium">{log.action}</div>
-                <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
-                  {JSON.stringify(log.payload, null, 2)}
-                </pre>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <Card className="order-1 lg:order-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+              <CardTitle>Recent logs</CardTitle>
+              <CardDescription>Latest orchestration events and status changes.</CardDescription>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => logsQuery.refetch()} className="gap-2">
+              <RotateCcw className="h-4 w-4" /> Refresh
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {logsQuery.isError ? (
+              <div className="flex items-center gap-2 text-sm text-red-500">
+                <AlertCircle className="h-4 w-4" /> {logsQuery.error?.message}
+              </div>
+            ) : logs.length === 0 ? (
+              <div className="text-sm text-muted-foreground">No logs yet.</div>
+            ) : (
+              <ScrollArea className="h-80">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-40">When</TableHead>
+                      <TableHead className="w-40">Action</TableHead>
+                      <TableHead>Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {logs.map((log) => (
+                      <TableRow key={log.id} className="align-top">
+                        <TableCell>
+                          <div className="text-xs text-muted-foreground">{formatDate(log.occurredAt)}</div>
+                          <div className="text-xs">{formatRelative(log.occurredAt)}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="text-xs font-medium">
+                            {log.action}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <pre className="max-h-40 overflow-auto rounded-md bg-muted/40 p-2 text-[11px] leading-relaxed">
+                            {JSON.stringify(log.payload, null, 2)}
+                          </pre>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
