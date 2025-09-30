@@ -7,8 +7,8 @@ import { toast } from 'sonner'
 import { useLoginWithAbstract } from '@abstract-foundation/agw-react'
 import { useAccount, useWalletClient } from 'wagmi'
 import { Button } from '@/components/ui/button'
-import { useAuthTokens } from '@/hooks/use-auth-tokens'
-import { clearTokens, prepareSiwe, saveTokens, verifySiwe } from '@/lib/api'
+import { prepareSiwe, verifySiwe, logout as apiLogout } from '@/lib/api'
+import { useSession } from '@/hooks/use-session'
 
 function getErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) return error.message
@@ -18,8 +18,8 @@ function getErrorMessage(error: unknown, fallback: string): string {
 
 export default function LandingAuthPanel(): JSX.Element {
   const router = useRouter()
-  const { tokens } = useAuthTokens()
-  const { login, logout } = useLoginWithAbstract()
+  const { session, isAuthenticated, refetch: refetchSession, isLoading: sessionLoading } = useSession()
+  const { login, logout: logoutWallet } = useLoginWithAbstract()
   const { address, status: connectionStatus } = useAccount()
   const { data: walletClient } = useWalletClient()
   const [isHoveringWallet, setIsHoveringWallet] = useState(false)
@@ -27,10 +27,10 @@ export default function LandingAuthPanel(): JSX.Element {
   const [isSigningIn, setIsSigningIn] = useState(false)
 
   useEffect(() => {
-    if (tokens?.accessToken) {
+    if (isAuthenticated) {
       router.replace('/dashboard')
     }
-  }, [tokens?.accessToken, router])
+  }, [isAuthenticated, router])
 
   const isConnected = connectionStatus === 'connected' && Boolean(address)
 
@@ -63,15 +63,18 @@ export default function LandingAuthPanel(): JSX.Element {
   const handleDisconnect = useCallback(async () => {
     try {
       setIsConnectingWallet(true)
-      clearTokens()
-      await Promise.resolve(logout())
+      if (isAuthenticated) {
+        await apiLogout().catch(() => {})
+        await refetchSession()
+      }
+      await Promise.resolve(logoutWallet())
       toast.success('Wallet disconnected')
     } catch (error) {
       toast.error(getErrorMessage(error, 'Failed to disconnect wallet'))
     } finally {
       setIsConnectingWallet(false)
     }
-  }, [logout])
+  }, [isAuthenticated, logoutWallet, refetchSession])
 
   const handleSignIn = useCallback(async () => {
     if (!isConnected || !walletClient) {
@@ -91,15 +94,15 @@ export default function LandingAuthPanel(): JSX.Element {
       const account = walletClient.account ?? (walletAddress as `0x${string}`)
       const prepared = await prepareSiwe({ address: walletAddress, chainId })
       const signature = await walletClient.signMessage({ account, message: prepared.message })
-      const newTokens = await verifySiwe({ message: prepared.message, signature })
-      saveTokens(newTokens)
+      await verifySiwe({ message: prepared.message, signature })
+      await refetchSession()
       toast.success('Login successful')
     } catch (error) {
       toast.error(getErrorMessage(error, 'Failed to login'))
     } finally {
       setIsSigningIn(false)
     }
-  }, [address, isConnected, walletClient])
+  }, [address, isConnected, walletClient, refetchSession])
 
   const onWalletButtonClick = useCallback(() => {
     if (isConnected) {
@@ -117,13 +120,11 @@ export default function LandingAuthPanel(): JSX.Element {
     [isConnected],
   )
 
-  if (tokens?.accessToken) {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-6 text-sm text-muted-foreground">
-        Redirecting to your dashboard…
-      </div>
-    )
-  }
+  const sessionStatusText = sessionLoading
+    ? 'Checking session…'
+    : isAuthenticated
+      ? `Signed in as ${session?.address}`
+      : 'Not signed in'
 
   return (
     <section className="space-y-6 rounded-2xl border border-border/80 bg-background/70 p-10 shadow-lg backdrop-blur">
@@ -153,6 +154,9 @@ export default function LandingAuthPanel(): JSX.Element {
             ? `Wallet connected: ${address.slice(0, 6)}…${address.slice(-4)}`
             : 'Wallet not connected'}
         </div>
+        <div className="rounded-lg border border-border/60 bg-background/40 p-4 text-sm text-muted-foreground">
+          {sessionStatusText}
+        </div>
         <Button
           size="lg"
           className="w-full justify-center"
@@ -162,7 +166,7 @@ export default function LandingAuthPanel(): JSX.Element {
           {isSigningIn ? 'Signing in…' : 'Login to app'}
         </Button>
         <p className="text-xs text-muted-foreground">
-          Signing in stores a short-lived session locally. Disconnecting your wallet clears cached credentials instantly.
+          Sessions are stored securely in HttpOnly cookies. Disconnecting your wallet clears the session immediately.
         </p>
       </div>
     </section>

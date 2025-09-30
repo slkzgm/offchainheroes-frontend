@@ -4,7 +4,7 @@
 import { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuthTokens } from '@/hooks/use-auth-tokens'
+import { useSession } from '@/hooks/use-session'
 import {
   getUserOverview,
   getBotConfig,
@@ -26,42 +26,41 @@ import { LogsCard } from '@/components/dashboard/logs-card'
 import { formatDate, formatRelative, getErrorMessage } from '@/components/dashboard/dashboard-utils'
 
 export default function BotDashboard(): JSX.Element {
-  const { tokens } = useAuthTokens()
-  const accessToken = tokens?.accessToken
+  const { session, isAuthenticated, isLoading: sessionLoading } = useSession()
   const queryClient = useQueryClient()
 
   const overviewQuery = useQuery<UserOverviewResponse, Error>({
-    queryKey: ['user-overview', accessToken],
-    queryFn: () => getUserOverview(accessToken as string),
-    enabled: Boolean(accessToken),
+    queryKey: ['user-overview', session?.userId],
+    queryFn: () => getUserOverview(),
+    enabled: isAuthenticated,
   })
 
   const configQuery = useQuery<BotConfigurationResponse, Error>({
-    queryKey: ['bot-config', accessToken],
-    queryFn: () => getBotConfig(accessToken as string),
-    enabled: Boolean(accessToken),
+    queryKey: ['bot-config', session?.userId],
+    queryFn: () => getBotConfig(),
+    enabled: isAuthenticated,
   })
 
   const logsQuery = useQuery<BotLogEntry[], Error>({
-    queryKey: ['bot-logs', accessToken],
-    queryFn: () => getBotLogs(accessToken as string, 50),
-    enabled: Boolean(accessToken),
+    queryKey: ['bot-logs', session?.userId],
+    queryFn: () => getBotLogs(50),
+    enabled: isAuthenticated,
     refetchInterval: 60_000,
   })
 
   const stateQuery = useQuery<BotStateResponse, Error>({
-    queryKey: ['bot-state', accessToken],
-    queryFn: () => getBotState(accessToken as string),
-    enabled: Boolean(accessToken),
+    queryKey: ['bot-state', session?.userId],
+    queryFn: () => getBotState(),
+    enabled: isAuthenticated,
     staleTime: 15_000,
   })
 
   const updateConfigMutation = useMutation({
     mutationFn: (payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean }>) =>
-      updateBotConfig(accessToken as string, payload),
+      updateBotConfig(payload),
     onSuccess: (data) => {
-      queryClient.setQueryData(['bot-config', accessToken], data)
-      queryClient.invalidateQueries({ queryKey: ['user-overview', accessToken] }).catch(() => {})
+      queryClient.setQueryData(['bot-config', session?.userId], data)
+      queryClient.invalidateQueries({ queryKey: ['user-overview', session?.userId] }).catch(() => {})
       toast.success('Configuration updated')
     },
     onError: (error: unknown) => {
@@ -70,11 +69,11 @@ export default function BotDashboard(): JSX.Element {
   })
 
   const manualRunMutation = useMutation({
-    mutationFn: () => triggerManualRun(accessToken as string),
+    mutationFn: () => triggerManualRun(),
     onSuccess: () => {
       toast.success('Manual run queued')
-      queryClient.invalidateQueries({ queryKey: ['bot-logs', accessToken] }).catch(() => {})
-      queryClient.invalidateQueries({ queryKey: ['bot-config', accessToken] }).catch(() => {})
+      queryClient.invalidateQueries({ queryKey: ['bot-logs', session?.userId] }).catch(() => {})
+      queryClient.invalidateQueries({ queryKey: ['bot-config', session?.userId] }).catch(() => {})
     },
     onError: (error: unknown) => {
       toast.error(getErrorMessage(error))
@@ -132,7 +131,18 @@ export default function BotDashboard(): JSX.Element {
       ? getErrorMessage(configQuery.error)
       : null
 
-  if (!tokens || !accessToken) {
+  if (sessionLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Loading session…</CardTitle>
+          <CardDescription>Checking authentication status.</CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
+  if (!isAuthenticated) {
     return (
       <Card>
         <CardHeader>

@@ -34,7 +34,7 @@ This repository hosts the Offchain Heroes control panel built with Next.js (App 
 
 - `src/lib/api.ts` contains all REST calls (`/auth`, `/bot`, `/user`). Do not call `fetch` elsewhere.
 - Always consume data through React Query hooks (QueryProvider already configured in `layout.tsx`).
-- `useAuthTokens` keeps localStorage and in-memory listeners in sync; use it instead of duplicating token logic.
+- Authentication state flows through `useSession`, which relies on HttpOnly cookies managed by the backend; never manage tokens manually on the client.
 
 ### State management
 
@@ -63,7 +63,7 @@ pnpm build && pnpm start       # production build + serve
 2. Separate data fetching from rendering (custom hooks + stateless UI components).
 3. Stay strongly typed. Import the response interfaces from `src/lib/api.ts`; avoid `any`.
 4. Accessibility first: rely on shadcn primitives (`Button`, `Label`, etc.).
-5. Token handling exclusively through `saveTokens`, `clearTokens`, and `useAuthTokens`.
+5. Auth persists via cookies—use `useSession` plus the helpers in `lib/api.ts` (`verifySiwe`, `logout`) instead of any localStorage token handling.
 6. Styling: Tailwind utility classes + `cn` helper from `lib/utils.ts`.
 7. Testing is not set up yet; document any new testing approach before adding it.
 8. Update `README.md` and this guide whenever flows or conventions change.

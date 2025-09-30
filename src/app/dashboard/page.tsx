@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ThemeSwitcher from '@/components/theme-switcher'
 import BotDashboard from '@/components/dashboard/bot-dashboard'
-import { useAuthTokens } from '@/hooks/use-auth-tokens'
+import { useSession } from '@/hooks/use-session'
 
 export default function DashboardPage(): JSX.Element {
   const router = useRouter()
-  const { tokens } = useAuthTokens()
+  const { session, isAuthenticated, isLoading } = useSession()
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -17,17 +17,17 @@ export default function DashboardPage(): JSX.Element {
   }, [])
 
   useEffect(() => {
-    if (!isMounted) return
-    if (!tokens?.accessToken) {
+    if (!isMounted || isLoading) return
+    if (!isAuthenticated) {
       router.replace('/')
     }
-  }, [isMounted, tokens?.accessToken, router])
+  }, [isMounted, isLoading, isAuthenticated, router])
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Preparing dashboard…</div>
   }
 
-  if (!tokens?.accessToken) {
+  if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6 text-sm text-muted-foreground">
         Redirecting to sign-in…
@@ -40,7 +40,7 @@ export default function DashboardPage(): JSX.Element {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Automation dashboard</h1>
-          <p className="text-sm text-muted-foreground">Monitor your bot configuration and live state.</p>
+          <p className="text-sm text-muted-foreground">Welcome back, {session?.address}</p>
         </div>
         <ThemeSwitcher />
       </header>
