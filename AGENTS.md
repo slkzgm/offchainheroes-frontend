@@ -1,99 +1,99 @@
-# Guide Agents Frontend
+# Frontend Agent Guide
 
-Ce dépôt contient le frontend Next.js (App Router) de la console Offchain Heroes. Ce guide résume l’organisation, les commandes utiles et les bonnes pratiques pour assurer une collaboration fluide entre agents.
+This repository hosts the Offchain Heroes control panel built with Next.js (App Router). The goal of this guide is to keep every contributor aligned on structure, tooling, and quality standards.
 
 ---
 
-## Structure & conventions
+## Project structure & naming
 
-- `src/app/` : routes App Router.
-  - `layout.tsx` : providers globaux (`ThemeProvider`, `AbstractProvider`, `QueryProvider`).
-  - `page.tsx` : console principale (auth + dashboard).
-- `src/components/` : composants réutilisables.
-  - `dashboard/` : widgets spécifiques (BotDashboard, etc.).
-  - `providers/` : wrappers (Abstract, React Query, Theme).
-  - `ui/` : primitives Shadcn générées via `pnpm dlx shadcn add ...`.
-- `src/hooks/` : hooks client (ex. `use-auth-tokens`).
-- `src/lib/` : helpers partagés (`api.ts`, `utils.ts`).
+- `src/app/`
+  - `layout.tsx` – global providers (`ThemeProvider`, `AbstractProvider`, `QueryProvider`).
+  - `page.tsx` – home dashboard (authentication + bot overview).
+- `src/components/`
+  - `dashboard/` – feature-driven widgets (e.g., `BotDashboard`).
+  - `providers/` – wrappers for global context/providers.
+  - `ui/` – shadcn/ui primitives generated via `pnpm dlx shadcn add …`.
+- `src/hooks/` – custom React hooks (client-only utilities).
+- `src/lib/` – shared helpers (`api.ts` for HTTP calls, `utils.ts` for UI helpers).
 
-### Conventions shadcn / Tailwind
+### shadcn / Tailwind conventions
 
-- Utiliser `pnpm dlx shadcn@latest add <component>` pour ajouter des primitives.
-- Pas de CSS custom tant que Tailwind/Shadcn couvre le besoin.
-- Privilégier les composants headless Shadcn pour la cohérence UX.
+- Add primitives with `pnpm dlx shadcn@latest add <component>` – never hand-copy from docs.
+- Avoid bespoke CSS while Tailwind + shadcn cover the use-case.
+- Reuse headless primitives to keep interactions consistent.
 
-### Principes de design
+### Design principles
 
-- Remplacer les emojis par des icônes cohérentes (Lucide/Shadcn) pour conserver une esthétique premium.
-- Gestion des espacements : chaque section doit respirer sans gaspiller l’espace ; ajuster padding/marges pour un alignement précis.
-- Style général : objectif « spa suisse » — sobre, minimaliste, haut de gamme ; quelque chose qu’un pro paierait des milliers $/mois et qui ferait sourire Steve Jobs.
-- Palette restreinte : s’en tenir à un jeu de couleurs cohérent (base Zinc shadcn) et n’introduire une couleur que si elle a une raison fonctionnelle claire.
-- Responsive by default : chaque composant doit rester élégant sur desktop **et** mobile, sans rupture visuelle.
+- Replace emojis with icons (Lucide/shadcn) to maintain a premium tone.
+- Spacing matters: each block should breathe without wasting space – tweak padding/margins consciously.
+- Overall aesthetic: “Swiss spa” — sleek, minimalist, premium; something a professional would happily pay thousands per month for (aim for a “Steve Jobs would smile” experience).
+- Stick to a cohesive palette (base zinc theme). Introduce accent colors only when they communicate meaning.
+- Responsive excellence: every component must remain elegant on both desktop and mobile.
 
 ### API & React Query
 
-- `src/lib/api.ts` centralise les appels REST (`/auth`, `/bot`, `/user`).
-- Toujours consommer l’API via React Query (providers déjà câblés).
-- Le hook `useAuthTokens` synchronise localStorage et déclencheur d’événements.
+- `src/lib/api.ts` contains all REST calls (`/auth`, `/bot`, `/user`). Do not call `fetch` elsewhere.
+- Always consume data through React Query hooks (QueryProvider already configured in `layout.tsx`).
+- `useAuthTokens` keeps localStorage and in-memory listeners in sync; use it instead of duplicating token logic.
 
-### Gestion d’état
+### State management
 
-- Pas d’état global type Redux. React Query + hooks suffisent.
-- Les toasts passent par `sonner`.
+- No Redux/Zustand. React Query + localized state is enough for now.
+- Toasts must go through `sonner`.
 
 ---
 
-## Commandes utiles
+## Handy commands
 
 ```bash
-pnpm install        # dépendances
-pnpm dev            # serveur Next en dev (localhost:3000)
-pnpm lint           # ESLint (via next lint)
-pnpm build && pnpm start  # build / production
+pnpm install                   # install dependencies
+pnpm dev                       # run Dev Server (http://localhost:3000)
+pnpm lint                      # lint via next lint
+pnpm build && pnpm start       # production build + serve
 ```
 
-- Préférer `pnpm` (monorepo aligné sur backend).
-- Lancer `pnpm lint` avant de proposer une MR.
+- Use `pnpm` consistently (shared workspace with the backend).
+- Run `pnpm lint` before proposing a PR.
 
 ---
 
-## Bonnes pratiques
+## Best practices
 
-1. **Pages légères** : placer la logique dans des composants dédiés/garder `app/page.tsx` minimal.
-2. **Séparation UI / data** : hook(s) pour la data, composants pour le rendu.
-3. **Typing strict** : importer les types depuis `src/lib/api.ts`. Aucun `any`.
-4. **Accessibilité** : utiliser les compos Shadcn accessibles ; boutons `Button`, formulaires `Label/Input`, etc.
-5. **Gestion des tokens** : utiliser `saveTokens`, `clearTokens`, `useAuthTokens`. Ne jamais stocker les JWT ailleurs.
-6. **Formatting** : Tailwind Utility-first, classes `clsx`/`cn` du `lib/utils.ts` (shadcn standard).
-7. **Tests** : pas de setup Jest pour l’instant. Prévoir d’introduire Testing Library/Vitest si besoin (documenter).
-8. **Docs** : mettre à jour `README.md` et ce fichier sur tout changement majeur de flow.
-
----
-
-## Checklist avant commit
-
-- Lint (`pnpm lint`).
-- Code cohérent avec les conventions shadcn.
-- Types valides ; pas de warnings TypeScript.
-- Endpoints consommés via `api.ts` uniquement.
-- Documenter les nouveaux composants/flows si nécessaire.
+1. Keep `app/page.tsx` thin – push feature logic into dedicated components.
+2. Separate data fetching from rendering (custom hooks + stateless UI components).
+3. Stay strongly typed. Import the response interfaces from `src/lib/api.ts`; avoid `any`.
+4. Accessibility first: rely on shadcn primitives (`Button`, `Label`, etc.).
+5. Token handling exclusively through `saveTokens`, `clearTokens`, and `useAuthTokens`.
+6. Styling: Tailwind utility classes + `cn` helper from `lib/utils.ts`.
+7. Testing is not set up yet; document any new testing approach before adding it.
+8. Update `README.md` and this guide whenever flows or conventions change.
 
 ---
 
-## Ajouter des composants Shadcn
+## Pre-commit checklist
+
+- `pnpm lint`
+- Shadcn components follow project conventions (no inline styles).
+- TypeScript passes without warnings.
+- All HTTP interactions go through `api.ts`.
+- Documentation updated when behaviour changes.
+
+---
+
+## Adding shadcn components
 
 ```bash
 pnpm dlx shadcn@latest add <component>
 ```
 
-Cela mettra à jour `components.json` et créera/actualisera les fichiers `src/components/ui/…`. Vérifier ensuite Tailwind et `globals.css`.
+The command updates `components.json`, writes the required files under `src/components/ui`, and adjusts Tailwind/CSS tokens if needed. Inspect the diff before committing.
 
 ---
 
-## Points de contact
+## Points of contact
 
-- Backend : se référer au `docs/frontend-api-guide.md` côté backend pour les endpoints.
-- Auth : wallets Abstract (provider déjà configuré).
-- Scheduling : données issues de `/bot/config`, `/bot/state`, `/bot/logs`.
+- Backend contract: see `backend/docs/frontend-api-guide.md`.
+- Auth: Abstract wallet flow is already wired via `AbstractProvider`.
+- Scheduling / bot data: consumed through `/bot/config`, `/bot/state`, `/bot/logs`.
 
-Ce guide doit rester court mais maintenu à jour. Ajouter toute règle qui faciliterait la vie du prochain agent.
+Keep this document concise but authoritative. If you find yourself answering the same question twice, add the answer here.
