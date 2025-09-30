@@ -186,13 +186,40 @@ export default function BotDashboard(): JSX.Element {
 
   const isErrored = overviewQuery.isError || configQuery.isError
 
+  const statBlocks = [
+    {
+      key: 'next-run',
+      label: 'Next scheduled run',
+      value: config?.nextCheck?.nextCheckAt ? formatRelative(config.nextCheck.nextCheckAt) : '—',
+      hint: config?.nextCheck?.nextCheckAt ? formatDate(config.nextCheck.nextCheckAt) : undefined,
+    },
+    {
+      key: 'last-success',
+      label: 'Last successful run',
+      value: config?.lastSuccessAt ? formatRelative(config.lastSuccessAt) : '—',
+      hint: config?.lastSuccessAt ? formatDate(config.lastSuccessAt) : undefined,
+    },
+    {
+      key: 'last-error',
+      label: 'Last error',
+      value: config?.lastErrorAt ? formatRelative(config.lastErrorAt) : '—',
+      hint: config?.lastErrorAt ? formatDate(config.lastErrorAt) : undefined,
+    },
+    {
+      key: 'hero-count',
+      label: 'Active heroes',
+      value: state?.heroes?.active.length ?? 0,
+      hint: `${(state?.heroes?.ready.length ?? 0) + (state?.heroes?.idle.length ?? 0)} awaiting`,
+    },
+  ]
+
   return (
     <div className="space-y-8">
-      <div className="grid gap-6 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+        <Card>
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <CardTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold">
                 Account overview
                 {sessionStatus?.hasCookie ? (
                   <Badge variant="outline" className="gap-1 text-xs font-medium">
@@ -214,51 +241,59 @@ export default function BotDashboard(): JSX.Element {
               </Badge>
             )}
           </CardHeader>
-          <CardContent className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2 text-sm">
-              <div className="text-xs uppercase text-muted-foreground">Session</div>
-              <div className="rounded-lg border border-border/60 bg-background/50 p-4">
-                <div>Game cookie: {sessionStatus?.hasCookie ? 'Linked' : 'Missing'}</div>
-                <div>
-                  Expires:{' '}
-                  {sessionStatus?.expiresAt ? formatDate(sessionStatus.expiresAt) : '—'}{' '}
-                  <span className="text-muted-foreground">
-                    {sessionStatus?.expiresAt ? `(${formatRelative(sessionStatus.expiresAt)})` : ''}
-                  </span>
-                </div>
-                <Separator className="my-3" />
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CalendarClock className="h-3 w-3" /> Next check:{' '}
-                  {config?.nextCheck?.nextCheckAt ? (
-                    <span>
-                      {formatDate(config.nextCheck.nextCheckAt)} · {formatRelative(config.nextCheck.nextCheckAt)}
-                    </span>
-                  ) : (
-                    'not scheduled'
-                  )}
-                </div>
-                {config?.nextCheck?.notes?.length ? (
-                  <div className="pt-2 text-xs text-muted-foreground">
-                    {config.nextCheck.notes.map((note) => (
-                      <div key={note}>• {note}</div>
-                    ))}
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading account summary…
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="text-xs uppercase text-muted-foreground">Session</div>
+                  <div className="rounded-lg border border-border/60 bg-background/50 p-4">
+                    <div className="text-sm">Game cookie: {sessionStatus?.hasCookie ? 'Linked' : 'Missing'}</div>
+                    <div className="text-sm">
+                      Expires:{' '}
+                      {sessionStatus?.expiresAt ? formatDate(sessionStatus.expiresAt) : '—'}{' '}
+                      <span className="text-xs text-muted-foreground">
+                        {sessionStatus?.expiresAt ? `(${formatRelative(sessionStatus.expiresAt)})` : ''}
+                      </span>
+                    </div>
+                    <Separator className="my-3" />
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CalendarClock className="h-3 w-3" /> Next check:{' '}
+                      {config?.nextCheck?.nextCheckAt ? (
+                        <span>
+                          {formatDate(config.nextCheck.nextCheckAt)} · {formatRelative(config.nextCheck.nextCheckAt)}
+                        </span>
+                      ) : (
+                        'not scheduled'
+                      )}
+                    </div>
+                    {config?.nextCheck?.notes?.length ? (
+                      <div className="pt-2 text-xs text-muted-foreground">
+                        {config.nextCheck.notes.map((note) => (
+                          <div key={note}>• {note}</div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
+                </div>
+                <div className="space-y-3">
+                  <div className="text-xs uppercase text-muted-foreground">Game profile</div>
+                  <div className="space-y-1 rounded-lg border border-border/60 bg-background/50 p-4 text-sm">
+                    <div>Username: {overview?.sessionUser?.username ?? '—'}</div>
+                    <div>Public key: {overview?.sessionUser?.publicKey ?? '—'}</div>
+                    <div>Discord: {overview?.sessionUser?.discordHandle ?? overview?.sessionUser?.discordId ?? '—'}</div>
+                    <div>Last sign-in: {formatDate(overview?.sessionUser?.lastSignedIn)}</div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="text-xs uppercase text-muted-foreground">Game profile</div>
-              <div className="space-y-1 rounded-lg border border-border/60 bg-background/50 p-4">
-                <div>Username: {overview?.sessionUser?.username ?? '—'}</div>
-                <div>Public key: {overview?.sessionUser?.publicKey ?? '—'}</div>
-                <div>Discord: {overview?.sessionUser?.discordHandle ?? overview?.sessionUser?.discordId ?? '—'}</div>
-                <div>Last sign-in: {formatDate(overview?.sessionUser?.lastSignedIn)}</div>
-              </div>
-            </div>
+            )}
           </CardContent>
-          {isErrored && (
+          {isErrored && !isLoading && (
             <CardFooter>
-              <Badge variant="destructive" className="gap-1">
+              <Badge variant="destructive" className="gap-1 text-xs font-medium">
                 <AlertCircle className="h-3 w-3" />
                 {overviewQuery.isError
                   ? getErrorMessage(overviewQuery.error)
@@ -268,83 +303,107 @@ export default function BotDashboard(): JSX.Element {
           )}
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-col gap-3">
-            <CardTitle>Bot controls</CardTitle>
-            <CardDescription>Enable automation and manage helper routines.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <Label htmlFor="bot-enabled" className="text-sm font-medium">
-                  Automation enabled
-                </Label>
-                <p className="text-xs text-muted-foreground">Pause or resume worker execution.</p>
-              </div>
-              <Switch
-                id="bot-enabled"
-                checked={config?.isEnabled ?? false}
-                onCheckedChange={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
-                disabled={updateConfigMutation.isPending || isLoading || configQuery.isError}
-              />
-            </div>
-            <Separator />
-            <div className="space-y-4">
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-semibold">Runtime snapshot</CardTitle>
+              <CardDescription className="text-xs">
+                Key scheduling signals and recent execution health.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              {statBlocks.map((stat) => (
+                <div
+                  key={stat.key}
+                  className="rounded-lg border border-border/60 bg-background/50 p-3"
+                >
+                  <div className="text-xs uppercase text-muted-foreground">{stat.label}</div>
+                  <div className="text-lg font-semibold">{stat.value ?? '—'}</div>
+                  {stat.hint ? (
+                    <div className="text-xs text-muted-foreground">{stat.hint}</div>
+                  ) : null}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-semibold">Bot controls</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <Label htmlFor="bot-auto-claim" className="text-sm font-medium">
-                    Auto-claim bait
+                  <Label htmlFor="bot-enabled" className="text-sm font-medium">
+                    Automation enabled
                   </Label>
-                  <p className="text-xs text-muted-foreground">Claim bait stashes during daily reset.</p>
+                  <p className="text-xs text-muted-foreground">Pause or resume worker execution.</p>
                 </div>
                 <Switch
-                  id="bot-auto-claim"
-                  checked={config?.autoClaimBait ?? false}
-                  onCheckedChange={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
-                  disabled={updateConfigMutation.isPending || isLoading || configQuery.isError}
+                  id="bot-enabled"
+                  checked={config?.isEnabled ?? false}
+                  onCheckedChange={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
+                  disabled={updateConfigMutation.isPending || configQuery.isError}
                 />
               </div>
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <Label htmlFor="bot-auto-sell" className="text-sm font-medium">
-                    Auto-sell fish
-                  </Label>
-                  <p className="text-xs text-muted-foreground">Automatically liquidate fish based on strategy.</p>
+              <Separator />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <Label htmlFor="bot-auto-claim" className="text-sm font-medium">
+                      Auto-claim bait
+                    </Label>
+                    <p className="text-xs text-muted-foreground">Claim bait stashes during daily reset.</p>
+                  </div>
+                  <Switch
+                    id="bot-auto-claim"
+                    checked={config?.autoClaimBait ?? false}
+                    onCheckedChange={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
+                    disabled={updateConfigMutation.isPending || configQuery.isError}
+                  />
                 </div>
-                <Switch
-                  id="bot-auto-sell"
-                  checked={config?.autoSellFish ?? false}
-                  onCheckedChange={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
-                  disabled={updateConfigMutation.isPending || isLoading || configQuery.isError}
-                />
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <Label htmlFor="bot-auto-sell" className="text-sm font-medium">
+                      Auto-sell fish
+                    </Label>
+                    <p className="text-xs text-muted-foreground">Automatically liquidate fish based on strategy.</p>
+                  </div>
+                  <Switch
+                    id="bot-auto-sell"
+                    checked={config?.autoSellFish ?? false}
+                    onCheckedChange={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
+                    disabled={updateConfigMutation.isPending || configQuery.isError}
+                  />
+                </div>
               </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex items-center justify-between">
-            <div className="space-y-1 text-xs text-muted-foreground">
-              <div>Last success: {formatDate(config?.lastSuccessAt)}</div>
-              <div>Last error: {formatDate(config?.lastErrorAt)}</div>
-            </div>
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={!config?.isEnabled || manualRunMutation.isPending}
-              onClick={() => manualRunMutation.mutate()}
-              className="gap-2"
-            >
-              {manualRunMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-              Trigger run
-            </Button>
-          </CardFooter>
-        </Card>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div>Last success: {formatDate(config?.lastSuccessAt)}</div>
+                <div>Last error: {formatDate(config?.lastErrorAt)}</div>
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={!config?.isEnabled || manualRunMutation.isPending}
+                onClick={() => manualRunMutation.mutate()}
+                className="gap-2"
+              >
+                {manualRunMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                Trigger run
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="order-2 lg:order-1">
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
+      <div className="grid gap-6 xl:grid-cols-[3fr,2fr]">
+        <Card>
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Live state</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-base font-semibold">Live state</CardTitle>
+              <CardDescription className="text-xs">
                 Snapshot captured {state?.timestamp ? formatRelative(state.timestamp) : '—'}.
               </CardDescription>
             </div>
@@ -357,15 +416,11 @@ export default function BotDashboard(): JSX.Element {
               <div className="flex items-center gap-2 text-sm text-red-500">
                 <AlertCircle className="h-4 w-4" /> {stateQuery.error?.message}
               </div>
-            ) : isLoading ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading live data…
-              </div>
             ) : state ? (
               <Tabs defaultValue="resources" className="space-y-4">
-                <TabsList className="w-full justify-start">
+                <TabsList className="w-full justify-start overflow-auto">
                   <TabsTrigger value="resources">Resources</TabsTrigger>
-                  <TabsTrigger value="heroes">Heroes</TabsTrigger>
+                  <TabsTrigger value="heroes">Roster</TabsTrigger>
                 </TabsList>
                 <TabsContent value="resources" className="space-y-4">
                   <div>
@@ -378,11 +433,11 @@ export default function BotDashboard(): JSX.Element {
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-lg border border-border/60 bg-background/50 p-3">
-                      <div className="text-xs text-muted-foreground">Marbles</div>
+                      <div className="text-xs text-muted-foreground">Marble balance</div>
                       <div className="text-lg font-semibold">{state.marbles?.balance ?? '—'}</div>
                     </div>
                     <div className="rounded-lg border border-border/60 bg-background/50 p-3">
-                      <div className="text-xs text-muted-foreground">Marble week</div>
+                      <div className="text-xs text-muted-foreground">Current week</div>
                       <div className="text-lg font-semibold">{state.marbles?.week ?? '—'}</div>
                     </div>
                   </div>
@@ -407,16 +462,16 @@ export default function BotDashboard(): JSX.Element {
                         {group.entries.length === 0 ? (
                           <div className="text-xs text-muted-foreground">No heroes in this state.</div>
                         ) : (
-                          <div className="space-y-2">
+                          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                             {group.entries.map((hero) => (
                               <div
                                 key={hero.id}
-                                className="rounded-lg border border-border/50 bg-background/50 p-3 text-xs text-muted-foreground"
+                                className="rounded-lg border border-border/40 bg-background/50 p-3 text-xs text-muted-foreground"
                               >
                                 <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
-                                  Hero #{hero.id}
+                                  #{hero.id}
                                   <Badge variant="outline" className="text-xs font-normal">
-                                    Energy {hero.energyEstimated ?? hero.energy ?? '—'} / {hero.maxEnergy ?? '—'}
+                                    {hero.energyEstimated ?? hero.energy ?? '—'} / {hero.maxEnergy ?? '—'} energy
                                   </Badge>
                                 </div>
                                 {hero.activeSession ? (
@@ -450,11 +505,13 @@ export default function BotDashboard(): JSX.Element {
           </CardContent>
         </Card>
 
-        <Card className="order-1 lg:order-2">
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <Card>
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Recent logs</CardTitle>
-              <CardDescription>Latest orchestration events and status changes.</CardDescription>
+              <CardTitle className="text-base font-semibold">Recent logs</CardTitle>
+              <CardDescription className="text-xs">
+                Latest orchestration events and status changes.
+              </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={() => logsQuery.refetch()} className="gap-2">
               <RotateCcw className="h-4 w-4" /> Refresh
@@ -468,7 +525,7 @@ export default function BotDashboard(): JSX.Element {
             ) : logs.length === 0 ? (
               <div className="text-sm text-muted-foreground">No logs yet.</div>
             ) : (
-              <ScrollArea className="h-80">
+              <ScrollArea className="h-[22rem]">
                 <Table>
                   <TableHeader>
                     <TableRow>
