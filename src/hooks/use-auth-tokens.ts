@@ -9,13 +9,15 @@ interface UseAuthTokensResult {
 }
 
 export function useAuthTokens(): UseAuthTokensResult {
-  const [tokens, setTokens] = useState<StoredTokens | null>(() => loadTokens())
+  const [tokens, setTokens] = useState<StoredTokens | null>(null)
 
   const syncTokens = useCallback(() => {
     setTokens(loadTokens())
   }, [])
 
   useEffect(() => {
+    syncTokens()
+
     const unsubscribe = onTokensChanged(syncTokens)
 
     function handleStorage(event: StorageEvent) {
