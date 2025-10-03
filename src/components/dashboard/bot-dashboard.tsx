@@ -11,10 +11,12 @@ import {
   updateBotConfig,
   triggerManualRun,
   getBotLogs,
+  getBotActivity,
   getBotState,
   type BotConfigurationResponse,
   type BotStateResponse,
   type BotLogEntry,
+  type BotActivityEntry,
   type UserOverviewResponse,
 } from '@/lib/api'
 import { toast } from 'sonner'
@@ -22,6 +24,7 @@ import { RuntimeSnapshotCard, type RuntimeStat } from '@/components/dashboard/ru
 import { BotControlsCard } from '@/components/dashboard/bot-controls-card'
 import { LiveStateCard, type LiveStateHeroGroup } from '@/components/dashboard/live-state-card'
 import { LogsCard } from '@/components/dashboard/logs-card'
+import { ActivityCard } from '@/components/dashboard/activity-card'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
 import { BotSessionCard } from '@/components/dashboard/bot-session-card'
 
@@ -44,6 +47,13 @@ export default function BotDashboard() {
   const logsQuery = useQuery<BotLogEntry[], Error>({
     queryKey: ['bot-logs', session?.userId],
     queryFn: () => getBotLogs(50),
+    enabled: isAuthenticated,
+    refetchInterval: 60_000,
+  })
+
+  const activityQuery = useQuery<BotActivityEntry[], Error>({
+    queryKey: ['bot-activity', session?.userId],
+    queryFn: () => getBotActivity(25),
     enabled: isAuthenticated,
     refetchInterval: 60_000,
   })
@@ -73,6 +83,7 @@ export default function BotDashboard() {
     onSuccess: () => {
       toast.success('Manual run queued')
       queryClient.invalidateQueries({ queryKey: ['bot-logs', session?.userId] }).catch(() => {})
+      queryClient.invalidateQueries({ queryKey: ['bot-activity', session?.userId] }).catch(() => {})
       queryClient.invalidateQueries({ queryKey: ['bot-config', session?.userId] }).catch(() => {})
     },
     onError: (error: unknown) => {
@@ -84,6 +95,7 @@ export default function BotDashboard() {
   const overview = overviewQuery.data
   const state = stateQuery.data
   const logs = logsQuery.data ?? []
+  const activities = activityQuery.data ?? []
 
   const sessionStatus = overview?.bot
   const isSessionLoading = overviewQuery.isLoading || configQuery.isLoading
@@ -183,13 +195,20 @@ export default function BotDashboard() {
           errorMessage={stateQuery.isError ? getErrorMessage(stateQuery.error) : null}
           onRefresh={() => stateQuery.refetch()}
         />
-        <LogsCard
-          logs={logs}
-          isLoading={logsQuery.isLoading}
-          errorMessage={logsQuery.isError ? getErrorMessage(logsQuery.error) : null}
-          onRefresh={() => logsQuery.refetch()}
+        <ActivityCard
+          activities={activities}
+          isLoading={activityQuery.isLoading}
+          errorMessage={activityQuery.isError ? getErrorMessage(activityQuery.error) : null}
+          onRefresh={() => activityQuery.refetch()}
         />
       </div>
+
+      <LogsCard
+        logs={logs}
+        isLoading={logsQuery.isLoading}
+        errorMessage={logsQuery.isError ? getErrorMessage(logsQuery.error) : null}
+        onRefresh={() => logsQuery.refetch()}
+      />
     </div>
   )
 }

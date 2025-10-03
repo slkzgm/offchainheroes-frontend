@@ -190,18 +190,111 @@ export async function triggerManualRun(): Promise<{ status: string }> {
   })
 }
 
+export type BotLogAction =
+  | 'heartbeat'
+  | 'claim_bait'
+  | 'fish_sold'
+  | 'fish_loot'
+  | 'error'
+  | 'scheduled'
+
+export type BotLogSeverity = 'debug' | 'info' | 'warning' | 'error'
+
 export type BotLogEntry = {
   id: string
   occurredAt: string
-  action: string
-  payload: unknown
+  action: BotLogAction
+  eventCode: string
+  severity: BotLogSeverity
+  message: string | null
+  humanArgs: Record<string, unknown>
+  context: Record<string, unknown> | null
+}
+
+type RawBotLogEntry = {
+  id: string
+  occurredAt: string
+  action: BotLogAction
+  eventCode: string
+  severity: BotLogSeverity
+  message?: unknown
+  humanArgs?: unknown
+  context?: unknown
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function sanitizeLogEntry(entry: RawBotLogEntry): BotLogEntry {
+  const humanArgs = isRecord(entry.humanArgs) ? entry.humanArgs : {}
+  const context = isRecord(entry.context) ? entry.context : null
+  const message = typeof entry.message === 'string' ? entry.message : null
+
+  return {
+    id: entry.id,
+    occurredAt: entry.occurredAt,
+    action: entry.action,
+    eventCode: entry.eventCode,
+    severity: entry.severity,
+    message,
+    humanArgs,
+    context,
+  }
 }
 
 export async function getBotLogs(limit = 50): Promise<BotLogEntry[]> {
   const params = new URLSearchParams({ limit: String(limit) })
-  return http(`/bot/logs?${params.toString()}`, {
+  const logs = await http<RawBotLogEntry[]>(`/bot/logs?${params.toString()}`, {
     method: 'GET',
   })
+  return logs.map(sanitizeLogEntry)
+}
+
+export type BotActivityType =
+  | 'heroes_launched'
+  | 'heroes_returned'
+  | 'bait_claimed'
+  | 'fish_sold'
+
+export type BotActivityEntry = {
+  id: string
+  occurredAt: string
+  type: BotActivityType
+  title: string
+  description: string | null
+  data: Record<string, unknown>
+  runLogId: string | null
+}
+
+type RawBotActivityEntry = {
+  id: string
+  occurredAt: string
+  type: BotActivityType
+  title: unknown
+  description?: unknown
+  data?: unknown
+  runLogId?: unknown
+}
+
+function sanitizeActivityEntry(entry: RawBotActivityEntry): BotActivityEntry {
+  return {
+    id: entry.id,
+    occurredAt: entry.occurredAt,
+    type: entry.type,
+    title: typeof entry.title === 'string' ? entry.title : String(entry.title ?? ''),
+    description: typeof entry.description === 'string' ? entry.description : null,
+    data: isRecord(entry.data) ? entry.data : {},
+    runLogId: typeof entry.runLogId === 'string' ? entry.runLogId : null,
+  }
+}
+
+export async function getBotActivity(limit = 25): Promise<BotActivityEntry[]> {
+  const params = new URLSearchParams({ limit: String(limit) })
+  const activity = await http<RawBotActivityEntry[]>(`/bot/activity?${params.toString()}`, {
+    method: 'GET',
+  })
+  return activity.map(sanitizeActivityEntry)
 }
 
 export interface BotStateResponse {
