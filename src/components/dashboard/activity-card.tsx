@@ -81,6 +81,9 @@ const activityLabels: Record<BotActivityEntry['type'], string> = {
   heroes_returned: 'Heroes returned',
   bait_claimed: 'Bait claimed',
   fish_sold: 'Fish sold',
+  bot_error: 'Bot error',
+  bot_disabled: 'Bot disabled',
+  global_announcement: 'Announcement',
 }
 
 function formatActivityType(type: BotActivityEntry['type']): string {
@@ -145,6 +148,26 @@ function deriveHighlights(activity: BotActivityEntry): HighlightItem[] {
       const marbles = coerceNumber(data.marblesEarned)
       entries.push({ label: 'Fish', value: sold ? String(sold) : '—' })
       entries.push({ label: 'Marbles', value: marbles ? String(marbles) : '—' })
+      break
+    }
+    case 'bot_error': {
+      const message = typeof data.message === 'string' ? data.message : activity.description ?? ''
+      const disable = data.disable === true
+      entries.push({ label: 'Error', value: message || '—' })
+      if (disable) {
+        entries.push({ label: 'Automation', value: 'Disabled' })
+      }
+      break
+    }
+    case 'bot_disabled': {
+      const reason = typeof data.message === 'string' ? data.message : activity.description ?? 'Automation paused'
+      entries.push({ label: 'Status', value: 'Disabled' })
+      entries.push({ label: 'Reason', value: reason })
+      break
+    }
+    case 'global_announcement': {
+      const scope = typeof data.scope === 'string' ? data.scope : 'Global'
+      entries.push({ label: 'Scope', value: scope })
       break
     }
     default:

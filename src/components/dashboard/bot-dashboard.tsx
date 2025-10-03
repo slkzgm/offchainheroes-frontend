@@ -13,11 +13,17 @@ import {
   getBotLogs,
   getBotActivity,
   getBotState,
+  getAlertSettings,
+  createTelegramLink,
+  disableTelegramAlerts,
+  updateAlertPreferences,
   type BotConfigurationResponse,
   type BotStateResponse,
   type BotLogEntry,
   type BotActivityEntry,
   type UserOverviewResponse,
+  type AlertSettingsResponse,
+  type TelegramLinkResponse,
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { RuntimeSnapshotCard, type RuntimeStat } from '@/components/dashboard/runtime-snapshot-card'
@@ -25,6 +31,7 @@ import { BotControlsCard } from '@/components/dashboard/bot-controls-card'
 import { LiveStateCard, type LiveStateHeroGroup } from '@/components/dashboard/live-state-card'
 import { LogsCard } from '@/components/dashboard/logs-card'
 import { ActivityCard } from '@/components/dashboard/activity-card'
+import { AlertSettingsCard } from '@/components/dashboard/alert-settings-card'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
 import { BotSessionCard } from '@/components/dashboard/bot-session-card'
 
@@ -65,6 +72,12 @@ export default function BotDashboard() {
     staleTime: 15_000,
   })
 
+  const alertSettingsQuery = useQuery<AlertSettingsResponse, Error>({
+    queryKey: ['alert-settings', session?.userId],
+    queryFn: () => getAlertSettings(),
+    enabled: isAuthenticated,
+  })
+
   const updateConfigMutation = useMutation({
     mutationFn: (payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean }>) =>
       updateBotConfig(payload),
@@ -91,11 +104,34 @@ export default function BotDashboard() {
     },
   })
 
+  const generateAlertLinkMutation = useMutation<TelegramLinkResponse, unknown, void>({
+    mutationFn: () => createTelegramLink(),
+  })
+
+  const disableAlertsMutation = useMutation({
+    mutationFn: () => disableTelegramAlerts(),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['alert-settings', session?.userId], data)
+    },
+  })
+
+  const updateAlertPreferencesMutation = useMutation({
+    mutationFn: (preferences: Record<string, boolean>) => updateAlertPreferences(preferences),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['alert-settings', session?.userId], data)
+      toast.success('Alert preferences updated')
+    },
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error))
+    },
+  })
+
   const config = configQuery.data
   const overview = overviewQuery.data
   const state = stateQuery.data
   const logs = logsQuery.data ?? []
   const activities = activityQuery.data ?? []
+  const alertSettings = alertSettingsQuery.data
 
   const sessionStatus = overview?.bot
   const isSessionLoading = overviewQuery.isLoading || configQuery.isLoading
@@ -137,8 +173,13 @@ export default function BotDashboard() {
   ]
 
   const handleSessionUpdated = useCallback(async () => {
-    await Promise.allSettled([overviewQuery.refetch(), configQuery.refetch(), stateQuery.refetch()])
-  }, [configQuery, overviewQuery, stateQuery])
+    await Promise.allSettled([
+      overviewQuery.refetch(),
+      configQuery.refetch(),
+      stateQuery.refetch(),
+      alertSettingsQuery.refetch(),
+    ])
+  }, [alertSettingsQuery, configQuery, overviewQuery, stateQuery])
 
   if (sessionLoading) {
     return (
@@ -184,6 +225,20 @@ export default function BotDashboard() {
             onToggleAutoClaim={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
             onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
             onTriggerRun={() => manualRunMutation.mutate()}
+          />
+          <AlertSettingsCard
+            settings={alertSettings}
+            isLoading={alertSettingsQuery.isLoading}
+            errorMessage={alertSettingsQuery.isError ? getErrorMessage(alertSettingsQuery.error) : null}
+            isGeneratingLink={generateAlertLinkMutation.isPending}
+            isUpdatingPreferences={updateAlertPreferencesMutation.isPending}
+            isDisabling={disableAlertsMutation.isPending}
+            onRefresh={() => alertSettingsQuery.refetch()}
+            onGenerateLink={() => generateAlertLinkMutation.mutateAsync()}
+            onDisable={async () => {
+              await disableAlertsMutation.mutateAsync()
+            }}
+            onUpdatePreferences={(preferences) => updateAlertPreferencesMutation.mutateAsync(preferences)}
           />
         </div>
       </div>

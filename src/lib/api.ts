@@ -256,6 +256,9 @@ export type BotActivityType =
   | 'heroes_returned'
   | 'bait_claimed'
   | 'fish_sold'
+  | 'bot_error'
+  | 'bot_disabled'
+  | 'global_announcement'
 
 export type BotActivityEntry = {
   id: string
@@ -391,4 +394,46 @@ export async function getSession(): Promise<SessionInfo | null> {
     throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`)
   }
   return (await res.json()) as SessionInfo
+}
+
+export interface AlertSettingsResponse {
+  telegram: {
+    linked: boolean
+    chatId?: string
+    label?: string | null
+    username?: string | null
+    linkedAt?: string
+  }
+  preferences: Record<string, boolean>
+}
+
+export interface TelegramLinkResponse {
+  startParameter: string
+  startUrl?: string
+  expiresAt: string
+}
+
+export async function getAlertSettings(): Promise<AlertSettingsResponse> {
+  return http('/bot/alerts/settings', {
+    method: 'GET',
+  })
+}
+
+export async function createTelegramLink(): Promise<TelegramLinkResponse> {
+  return http('/bot/alerts/telegram/link', {
+    method: 'POST',
+  })
+}
+
+export async function disableTelegramAlerts(): Promise<AlertSettingsResponse> {
+  return http('/bot/alerts/telegram', {
+    method: 'DELETE',
+  })
+}
+
+export async function updateAlertPreferences(preferences: Record<string, boolean>): Promise<AlertSettingsResponse> {
+  return http('/bot/alerts/preferences', {
+    method: 'POST',
+    body: JSON.stringify({ preferences }),
+  })
 }
