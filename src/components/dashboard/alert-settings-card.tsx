@@ -32,7 +32,7 @@ interface AlertSettingsCardProps {
   onRefresh: () => void
   onGenerateLink: () => Promise<TelegramLinkResponse>
   onDisable: () => Promise<void>
-  onUpdatePreferences: (preferences: Record<string, boolean>) => Promise<void>
+  onUpdatePreferences: (preferences: Record<string, boolean>) => Promise<AlertSettingsResponse>
 }
 
 const PREFERENCE_METADATA: Record<string, { label: string; description: string }> = {
