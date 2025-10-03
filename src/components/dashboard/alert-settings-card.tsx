@@ -64,6 +64,10 @@ const PREFERENCE_METADATA: Record<string, { label: string; description: string }
     label: 'Announcements',
     description: 'Studio-wide messages or major updates.',
   },
+  weekly_leaderboard_reminder: {
+    label: 'Weekly leaderboard reminder',
+    description: 'Friday reminder 10 minutes before the 15:59 UTC cutoff.',
+  },
 }
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
