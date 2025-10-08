@@ -115,6 +115,7 @@ const en = {
     liveState: {
       title: 'Live state',
       description: 'Snapshot captured {{time}}.',
+      loading: 'Loading live state…',
       refresh: 'Refresh',
       tabs: {
         general: 'General',
@@ -201,6 +202,7 @@ const en = {
     activity: {
       title: 'Recent activity',
       description: 'Key bot actions visible to players.',
+      loading: 'Loading activity feed…',
       empty: 'No activity recorded yet.',
       rawData: 'Raw data',
       types: {
@@ -238,6 +240,7 @@ const en = {
         descriptionPlaceholder: 'Telegram chat',
         descriptionUnlinked: 'Stay on top of runs with Telegram notifications.',
         manage: 'Manage',
+        loading: 'Loading alert settings…',
       },
       modal: {
         title: 'Telegram alerts',
@@ -345,6 +348,7 @@ const en = {
     logs: {
       title: 'System logs',
       description: 'Technical trace of orchestration events.',
+      loading: 'Loading execution log…',
       empty: 'No logs yet.',
       headers: {
         when: 'When',

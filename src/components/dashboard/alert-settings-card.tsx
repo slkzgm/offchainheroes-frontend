@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
@@ -292,6 +293,45 @@ export function AlertSettingsCard({
   const linkExpiryLabel = linkDetails
     ? formatRelative(linkDetails.expiresAt) || formatDate(linkDetails.expiresAt)
     : null
+
+  if (isLoading && !settings) {
+    return (
+      <Card className="border border-sky-500/25" aria-busy="true">
+        <CardContent className="flex flex-col gap-3 p-4">
+          <div aria-hidden="true" className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-3 w-3 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-60" />
+                </div>
+              </div>
+              <Skeleton className="h-9 w-full rounded-full sm:w-44" />
+            </div>
+            <div className="space-y-3 rounded-xl border border-sky-500/30 bg-background/70 p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-52" />
+                </div>
+                <Skeleton className="h-9 w-full rounded-full sm:w-48" />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <div key={index} className="space-y-2 rounded-lg border border-sky-500/25 p-3">
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-3 w-36" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <span className="sr-only">{t('dashboard.alerts.card.loading')}</span>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <>

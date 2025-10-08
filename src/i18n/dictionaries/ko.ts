@@ -116,6 +116,7 @@ const ko = {
     liveState: {
       title: '라이브 상태',
       description: '스냅샷 기준: {{time}}.',
+      loading: '라이브 상태 불러오는 중…',
       refresh: '새로고침',
       tabs: {
         general: '일반',
@@ -202,6 +203,7 @@ const ko = {
     activity: {
       title: '최근 활동',
       description: '플레이어에게 노출되는 주요 봇 활동입니다.',
+      loading: '활동 불러오는 중…',
       empty: '기록된 활동이 없습니다.',
       rawData: '원본 데이터',
       types: {
@@ -239,6 +241,7 @@ const ko = {
         descriptionPlaceholder: '텔레그램 채팅',
         descriptionUnlinked: '텔레그램 알림으로 실행 현황을 빠르게 파악하세요.',
         manage: '관리',
+        loading: '알림 설정 불러오는 중…',
       },
       modal: {
         title: '텔레그램 알림',
@@ -344,6 +347,7 @@ const ko = {
     logs: {
       title: '시스템 로그',
       description: '오케스트레이션 이벤트의 기술적 추적입니다.',
+      loading: '실행 로그 불러오는 중…',
       empty: '아직 로그가 없습니다.',
       headers: {
         when: '발생 시각',

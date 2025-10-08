@@ -11,6 +11,7 @@ import { formatDate, formatRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useMemo } from 'react'
 import { useTranslate } from '@/i18n/client'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface ActivityCardProps {
   activities: BotActivityEntry[]
@@ -49,7 +50,24 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
         </Button>
       </CardHeader>
       <CardContent>
-        {errorMessage ? (
+        {isLoading && !errorMessage && activities.length === 0 ? (
+          <div>
+            <ul className="space-y-4" aria-hidden="true">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <li key={index} className="space-y-3 rounded-lg border border-border/60 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </li>
+              ))}
+            </ul>
+            <span className="sr-only">{t('dashboard.activity.loading')}</span>
+          </div>
+        ) : errorMessage ? (
           <div className="flex items-center gap-2 text-sm text-red-500">
             <AlertCircle className="h-4 w-4" /> {errorMessage}
           </div>

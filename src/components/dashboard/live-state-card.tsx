@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils'
 import { AlertCircle, RotateCcw } from 'lucide-react'
 import { useTranslate } from '@/i18n/client'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export interface LiveStateHeroGroup {
   key: string
@@ -640,10 +641,40 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
               )}
             </TabsContent>
           </Tabs>
+        ) : state === undefined ? (
+          <LiveStateSkeleton label={t('dashboard.liveState.loading')} />
         ) : (
           <div className="text-sm text-muted-foreground">{t('dashboard.liveState.notification.noLiveData')}</div>
         )}
       </CardContent>
     </Card>
+  )
+}
+
+function LiveStateSkeleton({ label }: { label: string }) {
+  return (
+    <div aria-busy="true" aria-live="polite">
+      <span className="sr-only">{label}</span>
+      <div className="space-y-6" aria-hidden="true">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="rounded-xl border border-border/50 bg-background/60 p-4">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="mt-3 h-6 w-20" />
+              <Skeleton className="mt-2 h-3 w-32" />
+            </div>
+          ))}
+        </div>
+        <div className="rounded-xl border border-border/50 bg-background/60 p-4">
+          <Skeleton className="h-32 w-full" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-9 w-full rounded-full" />
+          <div className="rounded-xl border border-border/50 bg-background/60 p-4">
+            <Skeleton className="h-48 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

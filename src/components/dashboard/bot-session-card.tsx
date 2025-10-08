@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { BotConfigurationResponse, BotSessionStatus } from '@/lib/api'
 import { prepareBotSession, verifyBotSession } from '@/lib/api'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
@@ -102,8 +103,19 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> {t('dashboard.session.checking')}
+          <div>
+            <div className="space-y-4" aria-hidden="true">
+              <div className="flex items-center justify-between gap-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+              <div className="space-y-3 rounded-lg border border-border/60 bg-background/60 p-4">
+                <Skeleton className="h-3 w-40" />
+                <Skeleton className="h-3 w-44" />
+              </div>
+              <Skeleton className="h-3 w-48" />
+            </div>
+            <span className="sr-only">{t('dashboard.session.checking')}</span>
           </div>
         ) : (
           <div className="space-y-4 text-sm">

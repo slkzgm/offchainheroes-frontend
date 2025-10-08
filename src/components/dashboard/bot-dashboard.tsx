@@ -36,6 +36,7 @@ import { AlertSettingsCard } from '@/components/dashboard/alert-settings-card'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
 import { BotSessionCard } from '@/components/dashboard/bot-session-card'
 import { useI18n } from '@/i18n/client'
+import { BotDashboardSkeleton } from '@/components/dashboard/bot-dashboard-skeleton'
 
 export default function BotDashboard() {
   const { session, isAuthenticated, isLoading: sessionLoading } = useSession()
@@ -209,15 +210,17 @@ export default function BotDashboard() {
     ])
   }, [alertSettingsQuery, configQuery, overviewQuery, stateQuery])
 
-  if (sessionLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('dashboard.botDashboard.loading.title')}</CardTitle>
-          <CardDescription>{t('dashboard.botDashboard.loading.description')}</CardDescription>
-        </CardHeader>
-      </Card>
-    )
+  const isPrimingData = [
+    { data: overview, loading: overviewQuery.isLoading },
+    { data: config, loading: configQuery.isLoading },
+    { data: state, loading: stateQuery.isLoading },
+    { data: alertSettings, loading: alertSettingsQuery.isLoading },
+    { data: activities.length ? activities : null, loading: activityQuery.isLoading },
+    { data: logs.length ? logs : null, loading: logsQuery.isLoading },
+  ].some(({ data, loading }) => !data && loading)
+
+  if (sessionLoading || (isAuthenticated && isPrimingData)) {
+    return <BotDashboardSkeleton label={t('dashboard.botDashboard.loading.title')} />
   }
 
   if (!isAuthenticated) {

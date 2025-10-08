@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils'
 import { AlertCircle, Loader2, RotateCcw } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslate } from '@/i18n/client'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface LogsCardProps {
   logs: BotLogEntry[]
@@ -78,7 +79,28 @@ export function LogsCard({ logs, isLoading, errorMessage, onRefresh }: LogsCardP
         </Button>
       </CardHeader>
       <CardContent>
-        {errorMessage ? (
+        {isLoading && !errorMessage && logs.length === 0 ? (
+          <div>
+            <div className="space-y-3" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="rounded-lg border border-border/60 p-3">
+                  <div className="grid gap-3 sm:grid-cols-[160px,1fr]">
+                    <div className="space-y-2">
+                      <Skeleton className="h-3 w-28" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-3 w-32" />
+                      <Skeleton className="h-3 w-40" />
+                      <Skeleton className="h-3 w-36" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <span className="sr-only">{t('dashboard.logs.loading')}</span>
+          </div>
+        ) : errorMessage ? (
           <div className="flex items-center gap-2 text-sm text-red-500">
             <AlertCircle className="h-4 w-4" /> {errorMessage}
           </div>
