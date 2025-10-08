@@ -68,6 +68,7 @@ const ko: Messages = {
         configUpdated: '설정이 업데이트되었습니다',
         manualRunQueued: '수동 실행이 대기열에 등록되었습니다',
         alertsUpdated: '알림 환경설정이 업데이트되었습니다',
+        alertLocaleUpdated: '알림 언어가 업데이트되었습니다',
       },
       loading: {
         title: '세션 불러오는 중…',
@@ -260,6 +261,10 @@ const ko: Messages = {
         toggleOn: '켜짐',
         toggleOff: '꺼짐',
         syncInfo: '알림은 기기 간 자동으로 동기화됩니다. 새 채팅을 인증하려면 언제든지 링크를 재발급하세요.',
+        localeTitle: '알림 언어',
+        localeDescription: '지원되는 경우 텔레그램 알림이 {{language}}로 전송됩니다.',
+        localeDisabled: '텔레그램을 연결하면 알림 언어를 선택할 수 있습니다.',
+        localeFallback: '—',
       },
       toasts: {
         linkGenerated: '텔레그램 링크가 생성되었습니다. 텔레그램에서 /start 명령어를 보내 인증을 완료하세요.',

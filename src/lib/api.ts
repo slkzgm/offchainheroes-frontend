@@ -403,6 +403,8 @@ export interface AlertSettingsResponse {
     label?: string | null
     username?: string | null
     linkedAt?: string
+    locale: string
+    availableLocales: readonly string[]
   }
   preferences: Record<string, boolean>
 }
@@ -435,5 +437,12 @@ export async function updateAlertPreferences(preferences: Record<string, boolean
   return http('/bot/alerts/preferences', {
     method: 'POST',
     body: JSON.stringify({ preferences }),
+  })
+}
+
+export async function updateAlertLocale(locale: string): Promise<AlertSettingsResponse> {
+  return http('/bot/alerts/telegram/locale', {
+    method: 'POST',
+    body: JSON.stringify({ locale }),
   })
 }

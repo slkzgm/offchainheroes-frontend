@@ -17,6 +17,7 @@ import {
   createTelegramLink,
   disableTelegramAlerts,
   updateAlertPreferences,
+  updateAlertLocale,
   type BotConfigurationResponse,
   type BotStateResponse,
   type BotLogEntry,
@@ -122,6 +123,17 @@ export default function BotDashboard() {
     onSuccess: (data) => {
       queryClient.setQueryData(['alert-settings', session?.userId], data)
       toast.success(t('dashboard.botDashboard.toasts.alertsUpdated'))
+    },
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error))
+    },
+  })
+
+  const updateAlertLocaleMutation = useMutation({
+    mutationFn: (locale: string) => updateAlertLocale(locale),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['alert-settings', session?.userId], data)
+      toast.success(t('dashboard.botDashboard.toasts.alertLocaleUpdated'))
     },
     onError: (error: unknown) => {
       toast.error(getErrorMessage(error))
@@ -246,6 +258,7 @@ export default function BotDashboard() {
             errorMessage={alertSettingsQuery.isError ? getErrorMessage(alertSettingsQuery.error) : null}
             isGeneratingLink={generateAlertLinkMutation.isPending}
             isUpdatingPreferences={updateAlertPreferencesMutation.isPending}
+            isUpdatingLocale={updateAlertLocaleMutation.isPending}
             isDisabling={disableAlertsMutation.isPending}
             onRefresh={() => alertSettingsQuery.refetch()}
             onGenerateLink={() => generateAlertLinkMutation.mutateAsync()}
@@ -253,6 +266,7 @@ export default function BotDashboard() {
               await disableAlertsMutation.mutateAsync()
             }}
             onUpdatePreferences={(preferences) => updateAlertPreferencesMutation.mutateAsync(preferences)}
+            onUpdateLocale={(locale) => updateAlertLocaleMutation.mutateAsync(locale)}
           />
         </div>
       </div>

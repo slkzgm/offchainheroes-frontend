@@ -67,6 +67,7 @@ const en = {
         configUpdated: 'Configuration updated',
         manualRunQueued: 'Manual run queued',
         alertsUpdated: 'Alert preferences updated',
+        alertLocaleUpdated: 'Alert language updated',
       },
       loading: {
         title: 'Loading session…',
@@ -261,6 +262,10 @@ const en = {
         toggleOff: 'Off',
         syncInfo:
           'Alerts stay in sync across devices. Regenerate a link anytime to authenticate a new chat.',
+        localeTitle: 'Alert language',
+        localeDescription: 'Telegram alerts will be delivered in {{language}}.',
+        localeDisabled: 'Link Telegram to choose the language for alerts.',
+        localeFallback: '—',
       },
       toasts: {
         linkGenerated: 'Telegram link generated. Send the /start command in Telegram to finish linking.',

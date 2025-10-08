@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
@@ -15,6 +16,7 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Languages,
   Link2,
   Loader2,
   RefreshCcw,
@@ -22,6 +24,9 @@ import {
   X,
 } from 'lucide-react'
 import { useTranslate } from '@/i18n/client'
+import { isLocale, localeLabels } from '@/i18n/config'
+
+const EMPTY_LOCALE_CODES: readonly string[] = []
 
 interface AlertSettingsCardProps {
   settings?: AlertSettingsResponse
@@ -29,11 +34,13 @@ interface AlertSettingsCardProps {
   errorMessage?: string | null
   isGeneratingLink: boolean
   isUpdatingPreferences: boolean
+  isUpdatingLocale: boolean
   isDisabling: boolean
   onRefresh: () => void
   onGenerateLink: () => Promise<TelegramLinkResponse>
   onDisable: () => Promise<void>
   onUpdatePreferences: (preferences: Record<string, boolean>) => Promise<AlertSettingsResponse>
+  onUpdateLocale: (locale: string) => Promise<AlertSettingsResponse>
 }
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
@@ -78,11 +85,13 @@ export function AlertSettingsCard({
   errorMessage,
   isGeneratingLink,
   isUpdatingPreferences,
+  isUpdatingLocale,
   isDisabling,
   onRefresh,
   onGenerateLink,
   onDisable,
   onUpdatePreferences,
+  onUpdateLocale,
 }: AlertSettingsCardProps) {
   const [linkDetails, setLinkDetails] = useState<TelegramLinkResponse | null>(null)
   const [copied, setCopied] = useState(false)
@@ -172,6 +181,50 @@ export function AlertSettingsCard({
 
   const preferenceCount = preferenceEntries.length
 
+  const availableLocaleCodes = settings?.telegram?.availableLocales ?? EMPTY_LOCALE_CODES
+  const resolvedLocaleCode = useMemo(() => {
+    if (!availableLocaleCodes.length) {
+      return (settings?.telegram?.locale ?? 'en').split('-')[0]
+    }
+    const raw = (settings?.telegram?.locale ?? '').toLowerCase()
+    if (!raw) {
+      return availableLocaleCodes[0]
+    }
+    const directMatch = availableLocaleCodes.find((code) => code.toLowerCase() === raw)
+    if (directMatch) {
+      return directMatch
+    }
+    const [base] = raw.split('-')
+    const baseMatch = availableLocaleCodes.find((code) => code.toLowerCase() === base)
+    if (baseMatch) {
+      return baseMatch
+    }
+    return availableLocaleCodes[0]
+  }, [availableLocaleCodes, settings?.telegram?.locale])
+
+  const localeOptions = useMemo(
+    () =>
+      availableLocaleCodes.map((value) => ({
+        value,
+        label: isLocale(value) ? localeLabels[value] : value.toUpperCase(),
+      })),
+    [availableLocaleCodes],
+  )
+
+  const currentLocaleLabel = useMemo(() => {
+    if (!resolvedLocaleCode) {
+      return t('dashboard.alerts.modal.localeFallback')
+    }
+    if (isLocale(resolvedLocaleCode)) {
+      return localeLabels[resolvedLocaleCode]
+    }
+    const [base] = resolvedLocaleCode.split('-')
+    if (isLocale(base)) {
+      return localeLabels[base]
+    }
+    return resolvedLocaleCode.toUpperCase()
+  }, [resolvedLocaleCode, t])
+
   const handleGenerateLink = async () => {
     try {
       const result = await onGenerateLink()
@@ -223,6 +276,16 @@ export function AlertSettingsCard({
     if (!linkDetails?.startUrl) return
     if (typeof window !== 'undefined') {
       window.open(linkDetails.startUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const handleLocaleSelect = async (nextLocale: string) => {
+    if (!linked) return
+    if (!nextLocale || nextLocale === resolvedLocaleCode) return
+    try {
+      await onUpdateLocale(nextLocale)
+    } catch {
+      // Toast handled by caller
     }
   }
 
@@ -351,7 +414,7 @@ export function AlertSettingsCard({
                   {linked ? t('dashboard.alerts.modal.newLink') : t('dashboard.alerts.modal.linkTelegram')}
                 </Button>
               </div>
-            </div>
+          </div>
 
             {linkDetails ? (
               <div className="space-y-2 rounded-lg border border-sky-500/30 bg-background/80 p-4">
@@ -384,6 +447,49 @@ export function AlertSettingsCard({
                     </span>
                   ) : null}
                 </div>
+              </div>
+            ) : null}
+
+            {localeOptions.length > 0 ? (
+              <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-1">
+                  <div className="text-sm font-semibold text-foreground">
+                    {t('dashboard.alerts.modal.localeTitle')}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {linked
+                      ? t('dashboard.alerts.modal.localeDescription', { language: currentLocaleLabel })
+                      : t('dashboard.alerts.modal.localeDisabled')}
+                  </p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 border-sky-500/40 text-xs font-semibold uppercase tracking-wide text-sky-600 hover:bg-sky-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:text-sky-300"
+                      disabled={!linked || isUpdatingLocale}
+                    >
+                      {isUpdatingLocale ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                      <span>{currentLocaleLabel}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {localeOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        disabled={!linked || isUpdatingLocale || option.value === resolvedLocaleCode}
+                        onClick={() => {
+                          void handleLocaleSelect(option.value)
+                        }}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <span>{option.label}</span>
+                        {option.value === resolvedLocaleCode ? <Check className="h-4 w-4 text-sky-500" /> : null}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : null}
           </div>
