@@ -15,6 +15,8 @@ export type Messages = NormalizeMessages<DictionaryMessages>
 const dictionaries: Record<Locale, () => Promise<Messages>> = {
   en: () => import('./dictionaries/en').then((module) => module.default),
   ko: () => import('./dictionaries/ko').then((module) => module.default),
+  zh: () => import('./dictionaries/zh').then((module) => module.default),
+  ru: () => import('./dictionaries/ru').then((module) => module.default),
 }
 
 type Path<T> = T extends string
