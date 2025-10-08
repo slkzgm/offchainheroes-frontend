@@ -1,6 +1,16 @@
 import type { Locale } from './config'
 import { defaultLocale } from './config'
-import type { Messages } from './dictionaries/en'
+import type { Messages as DictionaryMessages } from './dictionaries/en'
+
+type NormalizeMessages<T> = T extends string
+  ? string
+  : T extends Array<infer U>
+    ? Array<NormalizeMessages<U>>
+    : T extends Record<string, unknown>
+      ? { [K in keyof T]: NormalizeMessages<T[K]> }
+      : T
+
+export type Messages = NormalizeMessages<DictionaryMessages>
 
 const dictionaries: Record<Locale, () => Promise<Messages>> = {
   en: () => import('./dictionaries/en').then((module) => module.default),

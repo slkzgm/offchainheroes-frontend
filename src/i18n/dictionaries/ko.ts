@@ -1,6 +1,6 @@
-import type { Messages } from './en'
+import type { Messages } from '../translator'
 
-const ko: Messages = {
+const ko = {
   metadata: {
     siteName: '온체인 슈퍼히어로 자동화',
     description:
@@ -386,6 +386,6 @@ const ko: Messages = {
     dim: '딤',
     system: '시스템',
   },
-}
+} satisfies Messages
 
 export default ko

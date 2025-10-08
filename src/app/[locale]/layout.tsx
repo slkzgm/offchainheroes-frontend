@@ -13,15 +13,22 @@ import {
 
 const SITE_URL = 'https://app.onchainsuperheroes.xyz'
 
-type LocaleParams = Promise<{ locale: string }> | { locale: string }
+type LocaleSegment = { locale?: string | string[] }
+type LocaleParams = Promise<LocaleSegment>
 
 function normalizeLocale(value?: string): Locale {
   if (!value) return defaultLocale
   return isLocale(value) ? value : defaultLocale
 }
 
-async function resolveLocale(params: LocaleParams): Promise<Locale> {
-  const localeParam = 'then' in params ? (await params).locale : params.locale
+function extractLocale(value?: string | string[]): string | undefined {
+  if (!value) return undefined
+  return Array.isArray(value) ? value[0] : value
+}
+
+async function resolveLocale(params?: LocaleParams): Promise<Locale> {
+  const localeSegment = params ? await params : undefined
+  const localeParam = extractLocale(localeSegment?.locale)
   return normalizeLocale(localeParam)
 }
 
@@ -29,7 +36,7 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
 }
 
-export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params?: LocaleParams }): Promise<Metadata> {
   const locale = await resolveLocale(params)
   const messages = await getMessages(locale)
   const t = createTranslator(messages)
@@ -99,7 +106,7 @@ export default async function LocaleLayout({
   params,
 }: {
   children: ReactNode
-  params: LocaleParams
+  params?: LocaleParams
 }) {
   const locale = await resolveLocale(params)
   const messages = await getMessages(locale)
