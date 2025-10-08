@@ -7,11 +7,13 @@ import { useQuery } from '@tanstack/react-query'
 import ThemeSwitcher from '@/components/theme-switcher'
 import LanguageSwitcher from '@/components/language-switcher'
 import BotDashboard from '@/components/dashboard/bot-dashboard'
+import { BotDashboardSkeleton } from '@/components/dashboard/bot-dashboard-skeleton'
 import { useSession } from '@/hooks/use-session'
 import { logout } from '@/lib/api'
 import { getUserOverview, type UserOverviewResponse } from '@/lib/api'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { getAvatarUrl, truncateAddress } from '@/lib/format'
 import { useI18n } from '@/i18n/client'
 export default function DashboardPage() {
@@ -51,7 +53,7 @@ export default function DashboardPage() {
   )
 
   if (!isMounted || isLoading) {
-    return <div className="p-6 text-sm text-muted-foreground">{t('dashboard.page.preparing')}</div>
+    return <DashboardPageSkeleton label={t('dashboard.page.preparing')} />
   }
 
   if (!isAuthenticated) {
@@ -92,6 +94,28 @@ export default function DashboardPage() {
         </div>
       </header>
       <BotDashboard />
+    </main>
+  )
+}
+
+function DashboardPageSkeleton({ label }: { label: string }) {
+  return (
+    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-12" aria-busy="true" aria-live="polite">
+      <header className="flex flex-col gap-4 rounded-3xl border border-border/60 bg-muted/30 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4" aria-hidden="true">
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+        </div>
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <Skeleton className="h-9 w-16 rounded-full" />
+          <Skeleton className="h-9 w-16 rounded-full" />
+          <Skeleton className="h-9 w-28 rounded-full" />
+        </div>
+      </header>
+      <BotDashboardSkeleton label={label} />
     </main>
   )
 }
