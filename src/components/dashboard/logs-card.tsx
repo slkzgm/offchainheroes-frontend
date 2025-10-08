@@ -1,3 +1,5 @@
+'use client'
+
 // path: src/components/dashboard/logs-card.tsx
 import { Badge, type BadgeProps } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,6 +17,8 @@ import type { BotLogEntry } from '@/lib/api'
 import { formatDate, formatRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { AlertCircle, Loader2, RotateCcw } from 'lucide-react'
+import { useMemo } from 'react'
+import { useTranslate } from '@/i18n/client'
 
 interface LogsCardProps {
   logs: BotLogEntry[]
@@ -24,18 +28,53 @@ interface LogsCardProps {
 }
 
 export function LogsCard({ logs, isLoading, errorMessage, onRefresh }: LogsCardProps) {
+  const t = useTranslate()
+  const severityStyles = useMemo<Record<BotLogEntry['severity'], SeverityStyle>>(
+    () => ({
+      debug: {
+        variant: 'outline',
+        className: 'border-dashed text-muted-foreground',
+        label: t('dashboard.logs.severity.debug'),
+      },
+      info: {
+        variant: 'secondary',
+        label: t('dashboard.logs.severity.info'),
+      },
+      warning: {
+        variant: 'default',
+        className: 'bg-amber-500 text-amber-950 hover:bg-amber-500/90',
+        label: t('dashboard.logs.severity.warning'),
+      },
+      error: {
+        variant: 'destructive',
+        label: t('dashboard.logs.severity.error'),
+      },
+    }),
+    [t],
+  )
+  const actionLabels = useMemo<Record<BotLogEntry['action'], string>>(
+    () => ({
+      heartbeat: t('dashboard.logs.actions.heartbeat'),
+      claim_bait: t('dashboard.logs.actions.claim_bait'),
+      fish_sold: t('dashboard.logs.actions.fish_sold'),
+      fish_loot: t('dashboard.logs.actions.fish_loot'),
+      error: t('dashboard.logs.actions.error'),
+      scheduled: t('dashboard.logs.actions.scheduled'),
+    }),
+    [t],
+  )
+  const formatAction = (action: BotLogEntry['action']) => actionLabels[action] ?? action
+
   return (
     <Card>
       <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle className="text-base font-semibold">System logs</CardTitle>
-          <CardDescription className="text-xs">
-            Technical trace of orchestration events.
-          </CardDescription>
+          <CardTitle className="text-base font-semibold">{t('dashboard.logs.title')}</CardTitle>
+          <CardDescription className="text-xs">{t('dashboard.logs.description')}</CardDescription>
         </div>
         <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2" disabled={isLoading}>
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-          Refresh
+          {t('common.actions.refresh')}
         </Button>
       </CardHeader>
       <CardContent>
@@ -44,14 +83,14 @@ export function LogsCard({ logs, isLoading, errorMessage, onRefresh }: LogsCardP
             <AlertCircle className="h-4 w-4" /> {errorMessage}
           </div>
         ) : logs.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No logs yet.</div>
+          <div className="text-sm text-muted-foreground">{t('dashboard.logs.empty')}</div>
         ) : (
           <ScrollArea className="h-[22rem]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-40">When</TableHead>
-                  <TableHead>Summary</TableHead>
+                  <TableHead className="w-40">{t('dashboard.logs.headers.when')}</TableHead>
+                  <TableHead>{t('dashboard.logs.headers.summary')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -62,7 +101,12 @@ export function LogsCard({ logs, isLoading, errorMessage, onRefresh }: LogsCardP
                       <div className="text-xs">{formatRelative(log.occurredAt)}</div>
                     </TableCell>
                     <TableCell>
-                      <LogSummary log={log} />
+                      <LogSummary
+                        log={log}
+                        severityStyles={severityStyles}
+                        formatAction={formatAction}
+                        rawContextLabel={t('dashboard.logs.rawContext')}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -79,40 +123,6 @@ type SeverityStyle = {
   variant: BadgeProps['variant']
   className?: string
   label: string
-}
-
-const severityStyles: Record<BotLogEntry['severity'], SeverityStyle> = {
-  debug: {
-    variant: 'outline',
-    className: 'border-dashed text-muted-foreground',
-    label: 'Debug',
-  },
-  info: {
-    variant: 'secondary',
-    label: 'Info',
-  },
-  warning: {
-    variant: 'default',
-    className: 'bg-amber-500 text-amber-950 hover:bg-amber-500/90',
-    label: 'Warning',
-  },
-  error: {
-    variant: 'destructive',
-    label: 'Error',
-  },
-}
-
-const actionLabels: Record<BotLogEntry['action'], string> = {
-  heartbeat: 'Heartbeat',
-  claim_bait: 'Claim bait',
-  fish_sold: 'Sell daily-deal fish',
-  fish_loot: 'Fishing rewards',
-  error: 'Error',
-  scheduled: 'Scheduled run',
-}
-
-function formatAction(action: BotLogEntry['action']): string {
-  return actionLabels[action] ?? action
 }
 
 function formatKey(key: string): string {
@@ -152,7 +162,17 @@ function hasEntries(record: Record<string, unknown> | null | undefined): record 
   return !!record && Object.keys(record).length > 0
 }
 
-function LogSummary({ log }: { log: BotLogEntry }) {
+function LogSummary({
+  log,
+  severityStyles,
+  formatAction,
+  rawContextLabel,
+}: {
+  log: BotLogEntry
+  severityStyles: Record<BotLogEntry['severity'], SeverityStyle>
+  formatAction: (action: BotLogEntry['action']) => string
+  rawContextLabel: string
+}) {
   const severityStyle = severityStyles[log.severity] ?? severityStyles.info
   const actionLabel = formatAction(log.action)
   const message = (log.message ?? '').trim() || actionLabel
@@ -190,7 +210,7 @@ function LogSummary({ log }: { log: BotLogEntry }) {
 
       {hasContext && (
         <details className="text-xs text-muted-foreground">
-          <summary className="cursor-pointer select-none">Raw context</summary>
+          <summary className="cursor-pointer select-none">{rawContextLabel}</summary>
           <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-muted/40 p-2 text-[11px] leading-relaxed text-foreground">
             {JSON.stringify(log.context, null, 2)}
           </pre>

@@ -34,10 +34,12 @@ import { ActivityCard } from '@/components/dashboard/activity-card'
 import { AlertSettingsCard } from '@/components/dashboard/alert-settings-card'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
 import { BotSessionCard } from '@/components/dashboard/bot-session-card'
+import { useI18n } from '@/i18n/client'
 
 export default function BotDashboard() {
   const { session, isAuthenticated, isLoading: sessionLoading } = useSession()
   const queryClient = useQueryClient()
+  const { t } = useI18n()
 
   const overviewQuery = useQuery<UserOverviewResponse, Error>({
     queryKey: ['user-overview', session?.userId],
@@ -84,7 +86,7 @@ export default function BotDashboard() {
     onSuccess: (data) => {
       queryClient.setQueryData(['bot-config', session?.userId], data)
       queryClient.invalidateQueries({ queryKey: ['user-overview', session?.userId] }).catch(() => {})
-      toast.success('Configuration updated')
+      toast.success(t('dashboard.botDashboard.toasts.configUpdated'))
     },
     onError: (error: unknown) => {
       toast.error(getErrorMessage(error))
@@ -94,7 +96,7 @@ export default function BotDashboard() {
   const manualRunMutation = useMutation({
     mutationFn: () => triggerManualRun(),
     onSuccess: () => {
-      toast.success('Manual run queued')
+      toast.success(t('dashboard.botDashboard.toasts.manualRunQueued'))
       queryClient.invalidateQueries({ queryKey: ['bot-logs', session?.userId] }).catch(() => {})
       queryClient.invalidateQueries({ queryKey: ['bot-activity', session?.userId] }).catch(() => {})
       queryClient.invalidateQueries({ queryKey: ['bot-config', session?.userId] }).catch(() => {})
@@ -119,7 +121,7 @@ export default function BotDashboard() {
     mutationFn: (preferences: Record<string, boolean>) => updateAlertPreferences(preferences),
     onSuccess: (data) => {
       queryClient.setQueryData(['alert-settings', session?.userId], data)
-      toast.success('Alert preferences updated')
+      toast.success(t('dashboard.botDashboard.toasts.alertsUpdated'))
     },
     onError: (error: unknown) => {
       toast.error(getErrorMessage(error))
@@ -139,36 +141,50 @@ export default function BotDashboard() {
   const heroGroups: LiveStateHeroGroup[] = useMemo(() => {
     if (!state?.heroes) return []
     return [
-      { key: 'active', label: `Active (${state.heroes.active.length})`, entries: state.heroes.active },
-      { key: 'ready', label: `Ready (${state.heroes.ready.length})`, entries: state.heroes.ready },
-      { key: 'idle', label: `Idle (${state.heroes.idle.length})`, entries: state.heroes.idle },
+      {
+        key: 'active',
+        label: t('dashboard.botDashboard.heroGroups.active', { count: state.heroes.active.length }),
+        entries: state.heroes.active,
+      },
+      {
+        key: 'ready',
+        label: t('dashboard.botDashboard.heroGroups.ready', { count: state.heroes.ready.length }),
+        entries: state.heroes.ready,
+      },
+      {
+        key: 'idle',
+        label: t('dashboard.botDashboard.heroGroups.idle', { count: state.heroes.idle.length }),
+        entries: state.heroes.idle,
+      },
     ]
-  }, [state?.heroes])
+  }, [state?.heroes, t])
 
   const runtimeStats: RuntimeStat[] = [
     {
       key: 'next-run',
-      label: 'Next scheduled run',
-      value: config?.nextCheck?.nextCheckAt ? formatRelative(config.nextCheck.nextCheckAt) : '—',
+      label: t('dashboard.botDashboard.runtimeStats.nextRun'),
+      value: config?.nextCheck?.nextCheckAt ? formatRelative(config.nextCheck.nextCheckAt) : t('common.placeholders.notAvailable'),
       hint: config?.nextCheck?.nextCheckAt ? formatDate(config.nextCheck.nextCheckAt) : undefined,
     },
     {
       key: 'last-success',
-      label: 'Last successful run',
-      value: config?.lastSuccessAt ? formatRelative(config.lastSuccessAt) : '—',
+      label: t('dashboard.botDashboard.runtimeStats.lastSuccess'),
+      value: config?.lastSuccessAt ? formatRelative(config.lastSuccessAt) : t('common.placeholders.notAvailable'),
       hint: config?.lastSuccessAt ? formatDate(config.lastSuccessAt) : undefined,
     },
     {
       key: 'last-error',
-      label: 'Last error',
-      value: config?.lastErrorAt ? formatRelative(config.lastErrorAt) : '—',
+      label: t('dashboard.botDashboard.runtimeStats.lastError'),
+      value: config?.lastErrorAt ? formatRelative(config.lastErrorAt) : t('common.placeholders.notAvailable'),
       hint: config?.lastErrorAt ? formatDate(config.lastErrorAt) : undefined,
     },
     {
       key: 'hero-count',
-      label: 'Active heroes',
+      label: t('dashboard.botDashboard.runtimeStats.activeHeroes'),
       value: state?.heroes?.active.length ?? 0,
-      hint: `${(state?.heroes?.ready.length ?? 0) + (state?.heroes?.idle.length ?? 0)} awaiting`,
+      hint: t('dashboard.botDashboard.runtimeStats.awaiting', {
+        count: (state?.heroes?.ready.length ?? 0) + (state?.heroes?.idle.length ?? 0),
+      }),
     },
   ]
 
@@ -185,8 +201,8 @@ export default function BotDashboard() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Loading session…</CardTitle>
-          <CardDescription>Checking authentication status.</CardDescription>
+          <CardTitle>{t('dashboard.botDashboard.loading.title')}</CardTitle>
+          <CardDescription>{t('dashboard.botDashboard.loading.description')}</CardDescription>
         </CardHeader>
       </Card>
     )
@@ -196,10 +212,8 @@ export default function BotDashboard() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Connect to view your dashboard</CardTitle>
-          <CardDescription>
-            Authenticate on the landing page to unlock configuration, live state, and logs.
-          </CardDescription>
+          <CardTitle>{t('dashboard.botDashboard.unauthenticated.title')}</CardTitle>
+          <CardDescription>{t('dashboard.botDashboard.unauthenticated.description')}</CardDescription>
         </CardHeader>
       </Card>
     )

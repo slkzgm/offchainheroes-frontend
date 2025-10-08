@@ -11,6 +11,7 @@ import type { BotConfigurationResponse, BotSessionStatus } from '@/lib/api'
 import { prepareBotSession, verifyBotSession } from '@/lib/api'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
 import { Loader2, Plug, RefreshCcw } from 'lucide-react'
+import { useTranslate } from '@/i18n/client'
 
 interface BotSessionCardProps {
   status?: BotSessionStatus
@@ -23,48 +24,52 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
   const { status: walletStatus, address } = useAccount()
   const { data: walletClient } = useWalletClient()
   const [isProcessing, setIsProcessing] = useState(false)
+  const t = useTranslate()
 
   const walletConnected = walletStatus === 'connected' && Boolean(address)
 
   const sessionBadge = useMemo(() => {
     if (!status?.hasCookie) {
-      return { variant: 'destructive' as const, label: 'Not linked' }
+      return { variant: 'destructive' as const, label: t('dashboard.session.badges.notLinked') }
     }
     if (status.expired) {
-      return { variant: 'destructive' as const, label: 'Expired' }
+      return { variant: 'destructive' as const, label: t('dashboard.session.badges.expired') }
     }
     if (status.renewSoon) {
-      return { variant: 'secondary' as const, label: 'Expiring soon' }
+      return { variant: 'secondary' as const, label: t('dashboard.session.badges.expiringSoon') }
     }
-    return { variant: 'default' as const, label: 'Active' }
-  }, [status])
+    return { variant: 'default' as const, label: t('dashboard.session.badges.active') }
+  }, [status, t])
 
   const expiresLabel = useMemo(() => {
-    if (!status?.expiresAt) return '—'
+    if (!status?.expiresAt) return t('common.placeholders.notAvailable')
     const relative = formatRelative(status.expiresAt)
     return relative ? `${formatDate(status.expiresAt)} · ${relative}` : formatDate(status.expiresAt)
-  }, [status?.expiresAt])
+  }, [status?.expiresAt, t])
 
   const nextCheckLabel = useMemo(() => {
     const nextAt = config?.nextCheck?.nextCheckAt
-    if (!nextAt) return 'Not scheduled'
+    if (!nextAt) return t('dashboard.session.notScheduled')
     const relative = formatRelative(nextAt)
     return relative ? `${formatDate(nextAt)} · ${relative}` : formatDate(nextAt)
-  }, [config?.nextCheck?.nextCheckAt])
+  }, [config?.nextCheck?.nextCheckAt, t])
 
   const guidance = useMemo(() => {
-    if (!status?.hasCookie) return 'Link your Onchain Heroes session cookie to enable automation runs.'
-    if (status.expired) return 'Session expired. Renew now to resume automated actions.'
+    if (!status?.hasCookie) return t('dashboard.session.hints.notLinked')
+    if (status.expired) return t('dashboard.session.hints.expired')
     if (status.renewSoon) {
       const minutes = Math.max(1, Math.round((status.renewAheadSeconds ?? 0) / 60))
-      return `Session will expire soon. Renew within ${minutes} minute${minutes > 1 ? 's' : ''}.`
+      return t('dashboard.session.hints.expiringSoon', {
+        minutes,
+        suffix: minutes > 1 ? 's' : '',
+      })
     }
-    return 'Session active. Renew anytime to rotate credentials proactively.'
-  }, [status])
+    return t('dashboard.session.hints.active')
+  }, [status, t])
 
   const handleLinkSession = useCallback(async () => {
     if (!walletConnected || !walletClient) {
-      toast.error('Connect your Abstract wallet to perform this action.')
+      toast.error(t('dashboard.session.errors.connectWallet'))
       return
     }
 
@@ -73,44 +78,44 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
       const prepared = await prepareBotSession()
       const account = walletClient.account ?? (address as `0x${string}` | undefined)
       if (!account) {
-        throw new Error('No connected wallet account found')
+        throw new Error(t('dashboard.session.errors.missingWallet'))
       }
       const signature = await walletClient.signMessage({ account, message: prepared.message })
       await verifyBotSession({ message: prepared.message, signature })
-      toast.success(status?.hasCookie ? 'Session renewed successfully' : 'Session linked successfully')
+      toast.success(status?.hasCookie ? t('dashboard.session.success.renewed') : t('dashboard.session.success.linked'))
       await onSessionUpdated?.()
     } catch (error) {
       toast.error(getErrorMessage(error))
     } finally {
       setIsProcessing(false)
     }
-  }, [address, onSessionUpdated, status?.hasCookie, walletClient, walletConnected])
+  }, [address, onSessionUpdated, status?.hasCookie, t, walletClient, walletConnected])
 
-  const actionLabel = status?.hasCookie ? 'Renew session' : 'Link session'
+  const actionLabel = status?.hasCookie ? t('dashboard.session.actions.renew') : t('dashboard.session.actions.link')
   const actionIcon = status?.hasCookie ? <RefreshCcw className="h-4 w-4" /> : <Plug className="h-4 w-4" />
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Game session</CardTitle>
-        <CardDescription>Authenticate with the game and keep the cookie fresh.</CardDescription>
+        <CardTitle className="text-base font-semibold">{t('dashboard.session.title')}</CardTitle>
+        <CardDescription>{t('dashboard.session.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Checking session status…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t('dashboard.session.checking')}
           </div>
         ) : (
           <div className="space-y-4 text-sm">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">Status</span>
+              <span className="text-muted-foreground">{t('dashboard.session.statusLabel')}</span>
               <Badge variant={sessionBadge.variant} className="text-xs font-medium">
                 {sessionBadge.label}
               </Badge>
             </div>
             <div className="rounded-lg border border-border/60 bg-background/60 p-4">
-              <InfoRow label="Expires" value={expiresLabel} />
-              <InfoRow label="Next automation check" value={nextCheckLabel} />
+              <InfoRow label={t('dashboard.session.expiresLabel')} value={expiresLabel} />
+              <InfoRow label={t('dashboard.session.nextCheckLabel')} value={nextCheckLabel} />
             </div>
             <p className="text-xs text-muted-foreground">{guidance}</p>
           </div>
@@ -126,7 +131,7 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
           {actionLabel}
         </Button>
         <span className="text-xs text-muted-foreground sm:text-right">
-          {walletConnected ? 'Signature uses the connected wallet.' : 'Connect wallet to enable session actions.'}
+          {walletConnected ? t('dashboard.session.hints.signature') : t('dashboard.session.hints.connectWallet')}
         </span>
       </CardFooter>
     </Card>

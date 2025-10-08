@@ -21,6 +21,7 @@ import {
   Send,
   X,
 } from 'lucide-react'
+import { useTranslate } from '@/i18n/client'
 
 interface AlertSettingsCardProps {
   settings?: AlertSettingsResponse
@@ -33,41 +34,6 @@ interface AlertSettingsCardProps {
   onGenerateLink: () => Promise<TelegramLinkResponse>
   onDisable: () => Promise<void>
   onUpdatePreferences: (preferences: Record<string, boolean>) => Promise<AlertSettingsResponse>
-}
-
-const PREFERENCE_METADATA: Record<string, { label: string; description: string }> = {
-  heroes_launched: {
-    label: 'Launch events',
-    description: 'When the bot sends heroes back to the fishing zones.',
-  },
-  heroes_returned: {
-    label: 'Return events',
-    description: 'When heroes come back with loot.',
-  },
-  bait_claimed: {
-    label: 'Bait claimed',
-    description: 'When daily bait allocations are harvested automatically.',
-  },
-  fish_sold: {
-    label: 'Fish sold',
-    description: 'When daily-deal fish are sold for marbles.',
-  },
-  bot_error: {
-    label: 'Errors',
-    description: 'Operational errors that require attention.',
-  },
-  bot_disabled: {
-    label: 'Bot disabled',
-    description: 'Alert when automation is turned off after repeated errors.',
-  },
-  global_announcement: {
-    label: 'Announcements',
-    description: 'Studio-wide messages or major updates.',
-  },
-  weekly_leaderboard_reminder: {
-    label: 'Weekly leaderboard reminder',
-    description: 'Friday reminder 10 minutes before the 15:59 UTC cutoff.',
-  },
 }
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
@@ -122,6 +88,44 @@ export function AlertSettingsCard({
   const [copied, setCopied] = useState(false)
   const [localPreferences, setLocalPreferences] = useState<Record<string, boolean>>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const t = useTranslate()
+  const preferenceMetadata = useMemo(
+    () => ({
+      heroes_launched: {
+        label: t('dashboard.alerts.preferences.heroes_launched.label'),
+        description: t('dashboard.alerts.preferences.heroes_launched.description'),
+      },
+      heroes_returned: {
+        label: t('dashboard.alerts.preferences.heroes_returned.label'),
+        description: t('dashboard.alerts.preferences.heroes_returned.description'),
+      },
+      bait_claimed: {
+        label: t('dashboard.alerts.preferences.bait_claimed.label'),
+        description: t('dashboard.alerts.preferences.bait_claimed.description'),
+      },
+      fish_sold: {
+        label: t('dashboard.alerts.preferences.fish_sold.label'),
+        description: t('dashboard.alerts.preferences.fish_sold.description'),
+      },
+      bot_error: {
+        label: t('dashboard.alerts.preferences.bot_error.label'),
+        description: t('dashboard.alerts.preferences.bot_error.description'),
+      },
+      bot_disabled: {
+        label: t('dashboard.alerts.preferences.bot_disabled.label'),
+        description: t('dashboard.alerts.preferences.bot_disabled.description'),
+      },
+      global_announcement: {
+        label: t('dashboard.alerts.preferences.global_announcement.label'),
+        description: t('dashboard.alerts.preferences.global_announcement.description'),
+      },
+      weekly_leaderboard_reminder: {
+        label: t('dashboard.alerts.preferences.weekly_leaderboard_reminder.label'),
+        description: t('dashboard.alerts.preferences.weekly_leaderboard_reminder.description'),
+      },
+    }),
+    [t],
+  )
 
   const linked = settings?.telegram?.linked ?? false
 
@@ -143,9 +147,12 @@ export function AlertSettingsCard({
 
   const preferenceEntries = useMemo(() => {
     return Object.entries(localPreferences)
-      .map(([key, value]) => ({ key, value, meta: PREFERENCE_METADATA[key] ?? { label: key, description: '' } }))
+      .map(([key, value]) => {
+        const meta = preferenceMetadata[key as keyof typeof preferenceMetadata] ?? { label: key, description: '' }
+        return { key, value, meta }
+      })
       .sort((a, b) => a.meta.label.localeCompare(b.meta.label))
-  }, [localPreferences])
+  }, [localPreferences, preferenceMetadata])
 
   const linkedAtLabel = useMemo(() => {
     if (!settings?.telegram?.linkedAt) return null
@@ -160,8 +167,8 @@ export function AlertSettingsCard({
     if (!telegram) return null
     if (telegram.label) return telegram.label
     if (telegram.username) return `@${telegram.username}`
-    return telegram.chatId ?? null
-  }, [linked, settings?.telegram])
+    return telegram.chatId ?? t('dashboard.alerts.card.descriptionPlaceholder')
+  }, [linked, settings?.telegram, t])
 
   const preferenceCount = preferenceEntries.length
 
@@ -170,7 +177,7 @@ export function AlertSettingsCard({
       const result = await onGenerateLink()
       setLinkDetails(result)
       setCopied(false)
-      toast.success('Telegram link generated. Send the /start command in Telegram to finish linking.')
+      toast.success(t('dashboard.alerts.toasts.linkGenerated'))
     } catch (error) {
       toast.error(getErrorMessage(error))
     }
@@ -180,7 +187,7 @@ export function AlertSettingsCard({
     try {
       await onDisable()
       setLinkDetails(null)
-      toast.success('Telegram alerts disabled')
+      toast.success(t('dashboard.alerts.toasts.disabled'))
     } catch (error) {
       toast.error(getErrorMessage(error))
     }
@@ -203,10 +210,10 @@ export function AlertSettingsCard({
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
         await navigator.clipboard.writeText(linkDetails.startParameter)
       } else {
-        throw new Error('Clipboard access unavailable')
+        throw new Error(t('common.errors.clipboardUnavailable'))
       }
       setCopied(true)
-      toast.success('Start parameter copied')
+      toast.success(t('dashboard.alerts.toasts.copied'))
     } catch (error) {
       toast.error(getErrorMessage(error))
     }
@@ -237,7 +244,7 @@ export function AlertSettingsCard({
               />
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">Telegram alerts</span>
+                  <span className="text-sm font-semibold text-foreground">{t('dashboard.alerts.card.title')}</span>
                   <Badge
                     variant="outline"
                     className={cn(
@@ -245,13 +252,15 @@ export function AlertSettingsCard({
                       linked ? 'border-sky-500/60 text-sky-600' : 'border-muted-foreground/40 text-muted-foreground',
                     )}
                   >
-                    {linked ? 'Linked' : 'Not linked'}
+                    {linked ? t('dashboard.alerts.card.statusLinked') : t('dashboard.alerts.card.statusNotLinked')}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {linked
-                    ? `Delivering to ${connectedChatLabel ?? 'Telegram chat'}.`
-                    : 'Stay on top of runs with Telegram notifications.'}
+                    ? t('dashboard.alerts.card.descriptionLinked', {
+                        destination: connectedChatLabel ?? t('dashboard.alerts.card.descriptionPlaceholder'),
+                      })
+                    : t('dashboard.alerts.card.descriptionUnlinked')}
                 </p>
               </div>
             </div>
@@ -262,7 +271,7 @@ export function AlertSettingsCard({
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Manage
+              {t('dashboard.alerts.card.manage')}
             </Button>
           </div>
           {errorMessage ? <p className="text-xs text-red-500">{errorMessage}</p> : null}
@@ -276,8 +285,8 @@ export function AlertSettingsCard({
               <Send className="h-4 w-4" />
             </span>
             <div>
-              <h2 className="text-base font-semibold text-foreground">Telegram alerts</h2>
-              <p className="text-xs text-muted-foreground">Manage your link and realtime notification preferences.</p>
+              <h2 className="text-base font-semibold text-foreground">{t('dashboard.alerts.modal.title')}</h2>
+              <p className="text-xs text-muted-foreground">{t('dashboard.alerts.modal.subtitle')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -306,17 +315,17 @@ export function AlertSettingsCard({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1">
                 <div className="text-sm font-semibold text-foreground">
-                  {linked ? 'Telegram connected' : 'Telegram not linked'}
+                  {linked ? t('dashboard.alerts.modal.connected') : t('dashboard.alerts.modal.notLinked')}
                 </div>
                 {linked ? (
                   <p className="text-xs text-muted-foreground">
-                    Sending alerts to {connectedChatLabel ?? 'telegram chat'}
-                    {linkedAtLabel ? ` · Linked ${linkedAtLabel}` : ''}
+                    {t('dashboard.alerts.modal.connectedDescription', {
+                      destination: connectedChatLabel ?? t('dashboard.alerts.card.descriptionPlaceholder'),
+                    })}
+                    {linkedAtLabel ? ` · ${t('dashboard.alerts.modal.linkedAt', { time: linkedAtLabel })}` : ''}
                   </p>
                 ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Generate a secure link to authenticate your Telegram account and start receiving alerts.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('dashboard.alerts.modal.unlinkedDescription')}</p>
                 )}
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2">
@@ -329,7 +338,7 @@ export function AlertSettingsCard({
                     disabled={isDisabling}
                   >
                     {isDisabling ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellOff className="h-4 w-4" />}
-                    Disable
+                    {t('dashboard.alerts.modal.disable')}
                   </Button>
                 ) : null}
                 <Button
@@ -339,7 +348,7 @@ export function AlertSettingsCard({
                   disabled={isGeneratingLink || isLoading}
                 >
                   {isGeneratingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-                  {linked ? 'New link' : 'Link Telegram'}
+                  {linked ? t('dashboard.alerts.modal.newLink') : t('dashboard.alerts.modal.linkTelegram')}
                 </Button>
               </div>
             </div>
@@ -348,7 +357,7 @@ export function AlertSettingsCard({
               <div className="space-y-2 rounded-lg border border-sky-500/30 bg-background/80 p-4">
                 <div className="space-y-1">
                   <span className="text-xs font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-300">
-                    Start command
+                    {t('dashboard.alerts.modal.startCommand')}
                   </span>
                   <code className="block rounded bg-muted/40 px-3 py-2 text-sm font-mono text-foreground">
                     /start {linkDetails.startParameter}
@@ -361,15 +370,18 @@ export function AlertSettingsCard({
                     className="border-sky-500/50 text-sky-600 hover:bg-sky-500/10 dark:text-sky-300"
                     onClick={handleCopy}
                   >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? 'Copied' : 'Copy'}
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}{' '}
+                    {copied ? t('dashboard.alerts.modal.copied') : t('dashboard.alerts.modal.copy')}
                   </Button>
                   {linkDetails.startUrl ? (
                     <Button size="sm" className="bg-sky-500 text-white hover:bg-sky-500/90" onClick={handleOpenTelegram}>
-                      <ExternalLink className="h-4 w-4" /> Open Telegram
+                      <ExternalLink className="h-4 w-4" /> {t('dashboard.alerts.modal.openTelegram')}
                     </Button>
                   ) : null}
                   {linkExpiryLabel ? (
-                    <span className="text-[11px] text-muted-foreground">Expires {linkExpiryLabel}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {t('dashboard.alerts.modal.expires', { time: linkExpiryLabel })}
+                    </span>
                   ) : null}
                 </div>
               </div>
@@ -377,10 +389,10 @@ export function AlertSettingsCard({
           </div>
 
           <div className="space-y-3">
-            <div className="text-sm font-semibold text-foreground">Notification preferences</div>
+            <div className="text-sm font-semibold text-foreground">{t('dashboard.alerts.modal.preferencesTitle')}</div>
             {preferenceCount === 0 ? (
               <div className="rounded-lg border border-dashed border-border/60 p-4 text-xs text-muted-foreground">
-                Preferences unavailable. Link Telegram to initialise alert channels.
+                {t('dashboard.alerts.modal.preferencesUnavailable')}
               </div>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
@@ -400,7 +412,9 @@ export function AlertSettingsCard({
                           disabled={isUpdatingPreferences}
                           className="data-[state=checked]:bg-sky-500 data-[state=checked]:shadow-[0_0_0_4px_rgba(14,165,233,0.12)]"
                         />
-                        <span className="text-[11px] text-muted-foreground">{value ? 'On' : 'Off'}</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {value ? t('dashboard.alerts.modal.toggleOn') : t('dashboard.alerts.modal.toggleOff')}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -409,9 +423,7 @@ export function AlertSettingsCard({
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Alerts stay in sync across devices. Regenerate a link anytime to authenticate a new chat.
-          </p>
+          <p className="text-xs text-muted-foreground">{t('dashboard.alerts.modal.syncInfo')}</p>
         </div>
       </Modal>
     </>

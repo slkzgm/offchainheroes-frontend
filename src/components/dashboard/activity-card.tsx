@@ -1,3 +1,5 @@
+'use client'
+
 // path: src/components/dashboard/activity-card.tsx
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,6 +9,8 @@ import { AlertCircle, Loader2, RotateCcw } from 'lucide-react'
 import type { BotActivityEntry } from '@/lib/api'
 import { formatDate, formatRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { useMemo } from 'react'
+import { useTranslate } from '@/i18n/client'
 
 interface ActivityCardProps {
   activities: BotActivityEntry[]
@@ -16,16 +20,32 @@ interface ActivityCardProps {
 }
 
 export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }: ActivityCardProps) {
+  const t = useTranslate()
+  const activityTypeLabels = useMemo(
+    () => ({
+      heroes_launched: t('dashboard.activity.types.heroes_launched'),
+      heroes_returned: t('dashboard.activity.types.heroes_returned'),
+      bait_claimed: t('dashboard.activity.types.bait_claimed'),
+      fish_sold: t('dashboard.activity.types.fish_sold'),
+      bot_error: t('dashboard.activity.types.bot_error'),
+      bot_disabled: t('dashboard.activity.types.bot_disabled'),
+      global_announcement: t('dashboard.activity.types.global_announcement'),
+    }),
+    [t],
+  )
+
+  const formatActivityType = (type: BotActivityEntry['type']) => activityTypeLabels[type] ?? type
+
   return (
     <Card>
       <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle className="text-base font-semibold">Recent activity</CardTitle>
-          <CardDescription className="text-xs">Key bot actions visible to players.</CardDescription>
+          <CardTitle className="text-base font-semibold">{t('dashboard.activity.title')}</CardTitle>
+          <CardDescription className="text-xs">{t('dashboard.activity.description')}</CardDescription>
         </div>
         <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2" disabled={isLoading}>
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-          Refresh
+          {t('common.actions.refresh')}
         </Button>
       </CardHeader>
       <CardContent>
@@ -34,7 +54,7 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
             <AlertCircle className="h-4 w-4" /> {errorMessage}
           </div>
         ) : activities.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No activity recorded yet.</div>
+          <div className="text-sm text-muted-foreground">{t('dashboard.activity.empty')}</div>
         ) : (
           <ScrollArea className="h-[22rem] pr-2">
             <ul className="space-y-4">
@@ -61,7 +81,7 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
                   <Highlights activity={activity} />
 
                   <details className="text-xs text-muted-foreground">
-                    <summary className="cursor-pointer select-none">Raw data</summary>
+                    <summary className="cursor-pointer select-none">{t('dashboard.activity.rawData')}</summary>
                     <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-muted/40 p-2 text-[11px] leading-relaxed text-foreground">
                       {JSON.stringify(activity.data, null, 2)}
                     </pre>
@@ -76,27 +96,15 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
   )
 }
 
-const activityLabels: Record<BotActivityEntry['type'], string> = {
-  heroes_launched: 'Heroes launched',
-  heroes_returned: 'Heroes returned',
-  bait_claimed: 'Bait claimed',
-  fish_sold: 'Fish sold',
-  bot_error: 'Bot error',
-  bot_disabled: 'Bot disabled',
-  global_announcement: 'Announcement',
-}
-
-function formatActivityType(type: BotActivityEntry['type']): string {
-  return activityLabels[type] ?? type
-}
-
 interface HighlightItem {
   label: string
   value: string
 }
 
 function Highlights({ activity }: { activity: BotActivityEntry }) {
-  const highlights = deriveHighlights(activity)
+  const t = useTranslate()
+  const placeholder = t('common.placeholders.notAvailable')
+  const highlights = deriveHighlights(activity, t)
   if (highlights.length === 0) {
     return null
   }
@@ -105,24 +113,28 @@ function Highlights({ activity }: { activity: BotActivityEntry }) {
       {highlights.map(({ label, value }) => (
         <li key={label}>
           <span className="font-medium text-foreground">{label}:</span>{' '}
-          <span className={cn(value === '—' && 'text-muted-foreground/80')}>{value}</span>
+          <span className={cn(value === placeholder && 'text-muted-foreground/80')}>{value}</span>
         </li>
       ))}
     </ul>
   )
 }
 
-function deriveHighlights(activity: BotActivityEntry): HighlightItem[] {
+function deriveHighlights(activity: BotActivityEntry, t: ReturnType<typeof useTranslate>): HighlightItem[] {
   const entries: HighlightItem[] = []
   const data = activity.data ?? {}
+  const placeholder = t('common.placeholders.notAvailable')
 
   switch (activity.type) {
     case 'heroes_launched': {
       const heroIds = Array.isArray(data.heroIds) ? data.heroIds.length : null
       const nextCheck = typeof data.nextCheckAt === 'string' ? data.nextCheckAt : null
-      entries.push({ label: 'Heroes', value: heroIds ? String(heroIds) : '—' })
+      entries.push({
+        label: t('dashboard.activity.highlights.heroes'),
+        value: heroIds ? String(heroIds) : placeholder,
+      })
       if (nextCheck) {
-        entries.push({ label: 'Next check', value: formatRelative(nextCheck) })
+        entries.push({ label: t('dashboard.activity.highlights.nextCheck'), value: formatRelative(nextCheck) })
       }
       break
     }
@@ -131,43 +143,69 @@ function deriveHighlights(activity: BotActivityEntry): HighlightItem[] {
       const totalFish = coerceNumber(summary.totalFish)
       const rewardedHeroes = coerceNumber(summary.rewardedHeroCount)
       const estimated = coerceNumber(summary.estimatedRegularValue)
-      entries.push({ label: 'Heroes', value: rewardedHeroes ? String(rewardedHeroes) : '—' })
-      entries.push({ label: 'Fish', value: totalFish ? String(totalFish) : '—' })
+      entries.push({
+        label: t('dashboard.activity.highlights.heroes'),
+        value: rewardedHeroes ? String(rewardedHeroes) : placeholder,
+      })
+      entries.push({
+        label: t('dashboard.activity.highlights.fish'),
+        value: totalFish ? String(totalFish) : placeholder,
+      })
       if (estimated && estimated > 0) {
-        entries.push({ label: 'Est. marbles', value: String(estimated) })
+        entries.push({ label: t('dashboard.activity.highlights.estMarbles'), value: String(estimated) })
       }
       break
     }
     case 'bait_claimed': {
       const total = coerceNumber(data.totalClaimed)
-      entries.push({ label: 'Bait claimed', value: total ? String(total) : '—' })
+      entries.push({
+        label: t('dashboard.activity.highlights.baitClaimed'),
+        value: total ? String(total) : placeholder,
+      })
       break
     }
     case 'fish_sold': {
       const sold = coerceNumber(data.dailyDealFishSold)
       const marbles = coerceNumber(data.marblesEarned)
-      entries.push({ label: 'Fish', value: sold ? String(sold) : '—' })
-      entries.push({ label: 'Marbles', value: marbles ? String(marbles) : '—' })
+      entries.push({
+        label: t('dashboard.activity.highlights.fish'),
+        value: sold ? String(sold) : placeholder,
+      })
+      entries.push({
+        label: t('dashboard.activity.highlights.marbles'),
+        value: marbles ? String(marbles) : placeholder,
+      })
       break
     }
     case 'bot_error': {
       const message = typeof data.message === 'string' ? data.message : activity.description ?? ''
       const disable = data.disable === true
-      entries.push({ label: 'Error', value: message || '—' })
+      entries.push({
+        label: t('dashboard.activity.highlights.error'),
+        value: message || placeholder,
+      })
       if (disable) {
-        entries.push({ label: 'Automation', value: 'Disabled' })
+        entries.push({
+          label: t('dashboard.activity.highlights.automation'),
+          value: t('dashboard.activity.highlights.disabledValue'),
+        })
       }
       break
     }
     case 'bot_disabled': {
-      const reason = typeof data.message === 'string' ? data.message : activity.description ?? 'Automation paused'
-      entries.push({ label: 'Status', value: 'Disabled' })
-      entries.push({ label: 'Reason', value: reason })
+      const defaultReason = t('dashboard.activity.highlights.automationPaused')
+      const reason = typeof data.message === 'string' ? data.message : activity.description ?? defaultReason
+      entries.push({
+        label: t('dashboard.activity.highlights.status'),
+        value: t('dashboard.activity.highlights.disabledValue'),
+      })
+      entries.push({ label: t('dashboard.activity.highlights.reason'), value: reason })
       break
     }
     case 'global_announcement': {
       const scope = typeof data.scope === 'string' ? data.scope : 'Global'
-      entries.push({ label: 'Scope', value: scope })
+      const scopeValue = scope || t('dashboard.activity.highlights.global')
+      entries.push({ label: t('dashboard.activity.highlights.scope'), value: scopeValue })
       break
     }
     default:

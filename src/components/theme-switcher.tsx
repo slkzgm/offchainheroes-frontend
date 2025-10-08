@@ -11,10 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTranslate } from '@/i18n/client'
 
 export default function ThemeSwitcher() {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const t = useTranslate()
 
   // Avoid hydration mismatch
   useEffect(() => {
@@ -25,7 +27,7 @@ export default function ThemeSwitcher() {
     return (
       <Button variant="outline" size="icon" className="rounded-full">
         <Sun className="h-5 w-5" />
-        <span className="sr-only">Toggle theme</span>
+        <span className="sr-only">{t('themeSwitcher.toggle')}</span>
       </Button>
     )
   }
@@ -48,7 +50,7 @@ export default function ThemeSwitcher() {
           className="rounded-full border-border text-muted-foreground ring-[3px] ring-ring/50 hover:text-green-500"
         >
           {getThemeIcon()}
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">{t('themeSwitcher.toggle')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -57,28 +59,28 @@ export default function ThemeSwitcher() {
           className={theme === 'light' ? 'bg-accent text-accent-foreground' : ''}
         >
           <Sun className="mr-2 h-4 w-4" />
-          <span>Light</span>
+          <span>{t('themeSwitcher.light')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme('dark')}
           className={theme === 'dark' ? 'bg-accent text-accent-foreground' : ''}
         >
           <Moon className="mr-2 h-4 w-4" />
-          <span>Dark</span>
+          <span>{t('themeSwitcher.dark')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme('dim')}
           className={theme === 'dim' ? 'bg-accent text-accent-foreground' : ''}
         >
           <Sunset className="mr-2 h-4 w-4" />
-          <span>Dim</span>
+          <span>{t('themeSwitcher.dim')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme('system')}
           className={theme === 'system' ? 'bg-accent text-accent-foreground' : ''}
         >
           <Laptop className="mr-2 h-4 w-4" />
-          <span>System</span>
+          <span>{t('themeSwitcher.system')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

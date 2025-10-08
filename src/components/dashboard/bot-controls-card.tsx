@@ -1,4 +1,6 @@
 // path: src/components/dashboard/bot-controls-card.tsx
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -7,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import type { BotConfigurationResponse } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { Loader2, RotateCcw } from 'lucide-react'
+import { useTranslate } from '@/i18n/client'
 
 interface BotControlsCardProps {
   config?: BotConfigurationResponse
@@ -29,18 +32,20 @@ export function BotControlsCard({
   onToggleAutoSell,
   onTriggerRun,
 }: BotControlsCardProps) {
+  const t = useTranslate()
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Bot controls</CardTitle>
+        <CardTitle className="text-base font-semibold">{t('dashboard.controls.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
             <Label htmlFor="bot-enabled" className="text-sm font-medium">
-              Automation enabled
+              {t('dashboard.controls.automation.label')}
             </Label>
-            <p className="text-xs text-muted-foreground">Pause or resume worker execution.</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.controls.automation.description')}</p>
           </div>
           <Switch
             id="bot-enabled"
@@ -54,9 +59,9 @@ export function BotControlsCard({
           <div className="flex items-center justify-between gap-4">
             <div>
               <Label htmlFor="bot-auto-claim" className="text-sm font-medium">
-                Auto-claim bait
+                {t('dashboard.controls.autoClaim.label')}
               </Label>
-              <p className="text-xs text-muted-foreground">Claim bait stashes during daily reset.</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.controls.autoClaim.description')}</p>
             </div>
             <Switch
               id="bot-auto-claim"
@@ -68,9 +73,9 @@ export function BotControlsCard({
           <div className="flex items-center justify-between gap-4">
             <div>
               <Label htmlFor="bot-auto-sell" className="text-sm font-medium">
-                Auto-sell fish
+                {t('dashboard.controls.autoSell.label')}
               </Label>
-              <p className="text-xs text-muted-foreground">Automatically liquidate fish based on strategy.</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.controls.autoSell.description')}</p>
             </div>
             <Switch
               id="bot-auto-sell"
@@ -83,8 +88,12 @@ export function BotControlsCard({
       </CardContent>
       <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1 text-xs text-muted-foreground">
-          <div>Last success: {formatDate(config?.lastSuccessAt)}</div>
-          <div>Last error: {formatDate(config?.lastErrorAt)}</div>
+          <div>
+            {t('dashboard.controls.lastSuccess')}: {formatDate(config?.lastSuccessAt)}
+          </div>
+          <div>
+            {t('dashboard.controls.lastError')}: {formatDate(config?.lastErrorAt)}
+          </div>
         </div>
         <Button
           size="sm"
@@ -94,7 +103,7 @@ export function BotControlsCard({
           className="gap-2"
         >
           {isManualRunPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-          Trigger run
+          {t('dashboard.controls.triggerRun')}
         </Button>
       </CardFooter>
     </Card>

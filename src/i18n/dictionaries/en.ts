@@ -1,0 +1,390 @@
+const en = {
+  metadata: {
+    siteName: 'Onchain Superheroes Automation',
+    description:
+      'Configure automation, monitor runs, and review live telemetry for your Onchain Heroes squads with the Onchain Superheroes control center.',
+    ogDescription:
+      'Secure dashboard for managing Onchain Heroes automation: configure routines, trigger runs, and track performance in real time.',
+    ogAlt: 'Onchain Superheroes automation dashboard preview',
+    twitterDescription:
+      'Control Onchain Heroes automation with live telemetry, scheduling insights, and streamlined session management.',
+  },
+  common: {
+    appName: 'Offchain Heroes',
+    actions: {
+      connectWallet: 'Connect Abstract Wallet',
+      disconnectWallet: 'Disconnect wallet',
+      login: 'Login to app',
+      signingIn: 'Signing in…',
+      manage: 'Manage',
+      refresh: 'Refresh',
+      switchLanguage: 'Switch language',
+    },
+    status: {
+      checkingSession: 'Checking session…',
+      notSignedIn: 'Not signed in',
+      signedInAs: 'Signed in as {{address}}',
+      walletNotConnected: 'Wallet not connected',
+      walletConnected: 'Wallet connected: {{address}}',
+    },
+    feedback: {
+      walletConnected: 'Wallet connected',
+      walletDisconnected: 'Wallet disconnected',
+      loginSuccess: 'Login successful',
+    },
+    errors: {
+      walletConnectFailed: 'Failed to connect wallet',
+      walletDisconnectFailed: 'Failed to disconnect wallet',
+      loginFailed: 'Failed to login',
+      connectWalletFirst: 'Connect Abstract Global Wallet first',
+      missingWalletAddress: 'No connected wallet address found',
+      clipboardUnavailable: 'Clipboard access unavailable',
+    },
+    info: {
+      sessionSecurity:
+        'Sessions are stored securely in HttpOnly cookies. Disconnecting your wallet clears the session immediately.',
+    },
+    placeholders: {
+      notAvailable: '—',
+    },
+    time: {
+      now: 'now',
+      inMinutes: 'in {{count}} min',
+      minutesAgo: '{{count}} min ago',
+    },
+  },
+  dashboard: {
+    page: {
+      title: 'Automation dashboard',
+      welcome: 'Welcome back, {{name}}',
+      preparing: 'Preparing dashboard…',
+      redirecting: 'Redirecting to sign-in…',
+      fallbackPilot: 'Pilot',
+      logout: 'Logout',
+    },
+    botDashboard: {
+      toasts: {
+        configUpdated: 'Configuration updated',
+        manualRunQueued: 'Manual run queued',
+        alertsUpdated: 'Alert preferences updated',
+      },
+      loading: {
+        title: 'Loading session…',
+        description: 'Checking authentication status.',
+      },
+      unauthenticated: {
+        title: 'Connect to view your dashboard',
+        description: 'Authenticate on the landing page to unlock configuration, live state, and logs.',
+      },
+      heroGroups: {
+        active: 'Active ({{count}})',
+        ready: 'Ready ({{count}})',
+        idle: 'Idle ({{count}})',
+      },
+      runtimeStats: {
+        nextRun: 'Next scheduled run',
+        lastSuccess: 'Last successful run',
+        lastError: 'Last error',
+        activeHeroes: 'Active heroes',
+        awaiting: '{{count}} awaiting',
+      },
+    },
+    controls: {
+      title: 'Bot controls',
+      automation: {
+        label: 'Automation enabled',
+        description: 'Pause or resume worker execution.',
+      },
+      autoClaim: {
+        label: 'Auto-claim bait',
+        description: 'Claim bait stashes during daily reset.',
+      },
+      autoSell: {
+        label: 'Auto-sell fish',
+        description: 'Automatically liquidate fish based on strategy.',
+      },
+      lastSuccess: 'Last success',
+      lastError: 'Last error',
+      triggerRun: 'Trigger run',
+    },
+    runtime: {
+      title: 'Runtime snapshot',
+      description: 'Scheduling signals and recent execution health metrics.',
+    },
+    liveState: {
+      title: 'Live state',
+      description: 'Snapshot captured {{time}}.',
+      refresh: 'Refresh',
+      tabs: {
+        general: 'General',
+        inventory: 'Inventory',
+        roster: 'Roster',
+      },
+      summary: {
+        marbleBalance: 'Marble balance',
+        currentWeek: 'Current week',
+        activeHeroes: 'Active heroes',
+        activeHeroesHint: '{{ready}} ready / {{idle}} idle',
+        dailyDeals: 'Daily deals',
+        noDeals: 'No deals today',
+        countdown: {
+          in: 'In {{duration}}',
+          soon: 'Resetting soon',
+        },
+      },
+      progress: {
+        title: 'Daily deals',
+        soldToday: 'Sold today',
+        remaining: '{{count}} remaining',
+        soldOut: 'Sold out',
+        sold: '{{count}} sold',
+        max: '{{count}} max',
+      },
+      inventory: {
+        fishTab: 'Fish',
+        baitTab: 'Baits',
+        fishSectionTitle: 'Fish inventory',
+        fishSectionDescription: 'Stock levels with estimated marble value if liquidated now.',
+        totalEstimatedValue: 'Total estimated value: {{value}} marbles.',
+        dealsBreakdown: 'Daily deals breakdown',
+        noDeals: 'No daily deals available right now. Check back after the next reset.',
+        table: {
+          fish: 'Fish',
+          quantity: 'Quantity',
+          unitValue: 'Unit value',
+          inventoryValue: 'Inventory value',
+          progress: 'Progress',
+          total: 'Total',
+        },
+      },
+      bait: {
+        title: 'Bait overview',
+        description: "Compare stored bait versus today's claimable queue by rarity.",
+        table: {
+          rarity: 'Rarity',
+          owned: 'Owned',
+          claimable: 'Claimable today',
+          total: 'Total',
+        },
+        noData: 'No bait data available.',
+        totalGearStaked: 'Total gear staked: {{value}}',
+      },
+      roster: {
+        heroesCount: '{{count}} heroes',
+        emptyState: 'No heroes in this state.',
+        noData: 'No hero data available.',
+      },
+      heroCard: {
+        hero: 'Hero #{{id}}',
+        alt: 'Hero {{id}}',
+        statusFishing: 'Fishing',
+        statusStandby: 'Standby',
+        elapsed: 'Elapsed {{duration}}',
+        activeSession: 'Active session',
+        energyUpdated: 'Energy updated {{time}}',
+        idle: 'Idle',
+        energy: 'Energy',
+        zone: 'Zone',
+        bait: 'Bait',
+        returnsIn: 'Returns in',
+        matures: 'Matures',
+        capIn: 'Cap in',
+        lastUpdate: 'Last update',
+        charged: 'Charged',
+        none: 'none',
+      },
+      notification: {
+        noLiveData: 'No live data available.',
+      },
+    },
+    activity: {
+      title: 'Recent activity',
+      description: 'Key bot actions visible to players.',
+      empty: 'No activity recorded yet.',
+      rawData: 'Raw data',
+      types: {
+        heroes_launched: 'Heroes launched',
+        heroes_returned: 'Heroes returned',
+        bait_claimed: 'Bait claimed',
+        fish_sold: 'Fish sold',
+        bot_error: 'Bot error',
+        bot_disabled: 'Bot disabled',
+        global_announcement: 'Announcement',
+      },
+      highlights: {
+        heroes: 'Heroes',
+        nextCheck: 'Next check',
+        fish: 'Fish',
+        estMarbles: 'Est. marbles',
+        baitClaimed: 'Bait claimed',
+        marbles: 'Marbles',
+        error: 'Error',
+        automation: 'Automation',
+        disabledValue: 'Disabled',
+        status: 'Status',
+        reason: 'Reason',
+        scope: 'Scope',
+        global: 'Global',
+        automationPaused: 'Automation paused',
+      },
+    },
+    alerts: {
+      card: {
+        title: 'Telegram alerts',
+        statusLinked: 'Linked',
+        statusNotLinked: 'Not linked',
+        descriptionLinked: 'Delivering to {{destination}}.',
+        descriptionPlaceholder: 'Telegram chat',
+        descriptionUnlinked: 'Stay on top of runs with Telegram notifications.',
+        manage: 'Manage',
+      },
+      modal: {
+        title: 'Telegram alerts',
+        subtitle: 'Manage your link and realtime notification preferences.',
+        connected: 'Telegram connected',
+        notLinked: 'Telegram not linked',
+        connectedDescription: 'Sending alerts to {{destination}}',
+        linkedAt: 'Linked {{time}}',
+        unlinkedDescription:
+          'Generate a secure link to authenticate your Telegram account and start receiving alerts.',
+        disable: 'Disable',
+        newLink: 'New link',
+        linkTelegram: 'Link Telegram',
+        startCommand: 'Start command',
+        copy: 'Copy',
+        copied: 'Copied',
+        openTelegram: 'Open Telegram',
+        expires: 'Expires {{time}}',
+        preferencesTitle: 'Notification preferences',
+        preferencesUnavailable: 'Preferences unavailable. Link Telegram to initialise alert channels.',
+        toggleOn: 'On',
+        toggleOff: 'Off',
+        syncInfo:
+          'Alerts stay in sync across devices. Regenerate a link anytime to authenticate a new chat.',
+      },
+      toasts: {
+        linkGenerated: 'Telegram link generated. Send the /start command in Telegram to finish linking.',
+        disabled: 'Telegram alerts disabled',
+        copied: 'Start parameter copied',
+      },
+      preferences: {
+        heroes_launched: {
+          label: 'Launch events',
+          description: 'When the bot sends heroes back to the fishing zones.',
+        },
+        heroes_returned: {
+          label: 'Return events',
+          description: 'When heroes come back with loot.',
+        },
+        bait_claimed: {
+          label: 'Bait claimed',
+          description: 'When daily bait allocations are harvested automatically.',
+        },
+        fish_sold: {
+          label: 'Fish sold',
+          description: 'When daily-deal fish are sold for marbles.',
+        },
+        bot_error: {
+          label: 'Errors',
+          description: 'Operational errors that require attention.',
+        },
+        bot_disabled: {
+          label: 'Bot disabled',
+          description: 'Alert when automation is turned off after repeated errors.',
+        },
+        global_announcement: {
+          label: 'Announcements',
+          description: 'Studio-wide messages or major updates.',
+        },
+        weekly_leaderboard_reminder: {
+          label: 'Weekly leaderboard reminder',
+          description: 'Friday reminder 10 minutes before the 15:59 UTC cutoff.',
+        },
+      },
+    },
+    session: {
+      title: 'Game session',
+      description: 'Authenticate with the game and keep the cookie fresh.',
+      checking: 'Checking session status…',
+      statusLabel: 'Status',
+      expiresLabel: 'Expires',
+      nextCheckLabel: 'Next automation check',
+      badges: {
+        notLinked: 'Not linked',
+        expired: 'Expired',
+        expiringSoon: 'Expiring soon',
+        active: 'Active',
+      },
+      actions: {
+        link: 'Link session',
+        renew: 'Renew session',
+      },
+      hints: {
+        notLinked: 'Link your Onchain Heroes session cookie to enable automation runs.',
+        expired: 'Session expired. Renew now to resume automated actions.',
+        expiringSoon: 'Session will expire soon. Renew within {{minutes}} minute{{suffix}}.',
+        active: 'Session active. Renew anytime to rotate credentials proactively.',
+        signature: 'Signature uses the connected wallet.',
+        connectWallet: 'Connect wallet to enable session actions.',
+      },
+      notScheduled: 'Not scheduled',
+      success: {
+        renewed: 'Session renewed successfully',
+        linked: 'Session linked successfully',
+      },
+      errors: {
+        connectWallet: 'Connect your Abstract wallet to perform this action.',
+        missingWallet: 'No connected wallet account found',
+      },
+    },
+    logs: {
+      title: 'System logs',
+      description: 'Technical trace of orchestration events.',
+      empty: 'No logs yet.',
+      headers: {
+        when: 'When',
+        summary: 'Summary',
+      },
+      severity: {
+        debug: 'Debug',
+        info: 'Info',
+        warning: 'Warning',
+        error: 'Error',
+      },
+      actions: {
+        heartbeat: 'Heartbeat',
+        claim_bait: 'Claim bait',
+        fish_sold: 'Sell daily-deal fish',
+        fish_loot: 'Fishing rewards',
+        error: 'Error',
+        scheduled: 'Scheduled run',
+      },
+      rawContext: 'Raw context',
+    },
+  },
+  landing: {
+    header: {
+      heroHeading: 'Access your automation dashboard',
+      heroDescription:
+        'Connect your Abstract wallet, then authenticate to unlock strategy management and live metrics.',
+    },
+    wallet: {
+      connecting: 'Connecting…',
+      disconnecting: 'Disconnecting…',
+    },
+    session: {
+      signingIn: 'Signing in…',
+    },
+  },
+  themeSwitcher: {
+    toggle: 'Toggle theme',
+    light: 'Light',
+    dark: 'Dark',
+    dim: 'Dim',
+    system: 'System',
+  },
+} as const
+
+export type Messages = typeof en
+
+export default en
