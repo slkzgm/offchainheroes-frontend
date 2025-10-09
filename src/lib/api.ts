@@ -148,6 +148,13 @@ export interface BotConfigurationResponse {
   isEnabled: boolean
   autoClaimBait: boolean
   autoSellFish: boolean
+  zoneId: number | null
+  effectiveZone: {
+    id: number
+    name: string
+    energy: number
+    enabled: boolean
+  }
   lastSuccessAt: string | null
   lastErrorAt: string | null
   nextCheckHint: string | null
@@ -176,11 +183,35 @@ export async function getBotConfig(): Promise<BotConfigurationResponse> {
 }
 
 export async function updateBotConfig(
-  payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean }>,
+  payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean; zoneId: number }>,
 ): Promise<BotConfigurationResponse> {
   return http('/bot/config', {
     method: 'POST',
     body: JSON.stringify(payload),
+  })
+}
+
+export interface FishingZone {
+  zoneId: number
+  name: string
+  energy: number
+  levelRequirement: number
+  deathRisk: number
+  minFishingTime: number
+  maxFishingTime: number
+  image: string
+  lockedImage: string
+  enabled: boolean
+  fishingConfig?: {
+    guaranteedFishDurationSeconds: number
+    fishMaxChances: Record<number, number>
+    availableFish: Record<number, number[]>
+  }
+}
+
+export async function listFishingZones(): Promise<FishingZone[]> {
+  return http('/bot/zones', {
+    method: 'GET',
   })
 }
 

@@ -6,33 +6,42 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import type { BotConfigurationResponse } from '@/lib/api'
+import type { BotConfigurationResponse, FishingZone } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { Loader2, RotateCcw } from 'lucide-react'
 import { useTranslate } from '@/i18n/client'
 
 interface BotControlsCardProps {
   config?: BotConfigurationResponse
+  zones: FishingZone[]
   disabled: boolean
   isUpdating: boolean
   isManualRunPending: boolean
   onToggleEnabled: (checked: boolean) => void
   onToggleAutoClaim: (checked: boolean) => void
   onToggleAutoSell: (checked: boolean) => void
+  onSelectZone: (zoneId: number) => void
+  isZoneLoading: boolean
   onTriggerRun: () => void
 }
 
 export function BotControlsCard({
   config,
+  zones,
   disabled,
   isUpdating,
   isManualRunPending,
   onToggleEnabled,
   onToggleAutoClaim,
   onToggleAutoSell,
+  onSelectZone,
+  isZoneLoading,
   onTriggerRun,
 }: BotControlsCardProps) {
   const t = useTranslate()
+  const selectedZoneId = config?.zoneId ?? config?.effectiveZone.id ?? null
+  const effectiveZone = config?.effectiveZone
+  const zoneDisabled = !!effectiveZone && !effectiveZone.enabled
 
   return (
     <Card>
@@ -56,6 +65,61 @@ export function BotControlsCard({
         </div>
         <Separator />
         <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="bot-zone" className="text-sm font-medium">
+                  {t('dashboard.controls.zone.label')}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t('dashboard.controls.zone.description')}
+                </p>
+              </div>
+              <select
+                id="bot-zone"
+                className="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                value={selectedZoneId ?? ''}
+                onChange={(event) => {
+                  const value = Number(event.target.value)
+                  if (Number.isFinite(value)) {
+                    onSelectZone(value)
+                  }
+                }}
+                disabled={disabled || isUpdating || isZoneLoading || zones.length === 0}
+              >
+                <option value="" disabled>
+                  {t('dashboard.controls.zone.placeholder')}
+                </option>
+                {zones.map((zone) => (
+                  <option key={zone.zoneId} value={zone.zoneId} disabled={!zone.enabled}>
+                    {t('dashboard.controls.zone.option', { name: zone.name, energy: zone.energy })}
+                  </option>
+                ))}
+                {!hasSelectedZoneOption && selectedZoneId !== null && effectiveZone ? (
+                  <option value={selectedZoneId}>
+                    {t('dashboard.controls.zone.option', {
+                      name: effectiveZone.name,
+                      energy: effectiveZone.energy,
+                    })}
+                  </option>
+                ) : null}
+              </select>
+            </div>
+            {effectiveZone ? (
+              <p className="text-xs text-muted-foreground">
+                {t('dashboard.controls.zone.active', {
+                  name: effectiveZone.name,
+                  energy: effectiveZone.energy,
+                })}
+                {zoneDisabled ? (
+                  <span className="ml-1 text-destructive">
+                    {t('dashboard.controls.zone.disabledNotice')}
+                  </span>
+                ) : null}
+              </p>
+            ) : null}
+          </div>
+          <Separator />
           <div className="flex items-center justify-between gap-4">
             <div>
               <Label htmlFor="bot-auto-claim" className="text-sm font-medium">

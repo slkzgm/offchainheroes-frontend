@@ -18,6 +18,7 @@ import {
   disableTelegramAlerts,
   updateAlertPreferences,
   updateAlertLocale,
+  listFishingZones,
   type BotConfigurationResponse,
   type BotStateResponse,
   type BotLogEntry,
@@ -25,6 +26,7 @@ import {
   type UserOverviewResponse,
   type AlertSettingsResponse,
   type TelegramLinkResponse,
+  type FishingZone,
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { RuntimeSnapshotCard, type RuntimeStat } from '@/components/dashboard/runtime-snapshot-card'
@@ -55,6 +57,13 @@ export default function BotDashboard() {
     enabled: isAuthenticated,
   })
 
+  const zonesQuery = useQuery<FishingZone[], Error>({
+    queryKey: ['bot-zones'],
+    queryFn: () => listFishingZones(),
+    enabled: isAuthenticated,
+    staleTime: 60 * 60 * 1000,
+  })
+
   const logsQuery = useQuery<BotLogEntry[], Error>({
     queryKey: ['bot-logs', session?.userId],
     queryFn: () => getBotLogs(50),
@@ -83,7 +92,7 @@ export default function BotDashboard() {
   })
 
   const updateConfigMutation = useMutation({
-    mutationFn: (payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean }>) =>
+    mutationFn: (payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean; zoneId: number }>) =>
       updateBotConfig(payload),
     onSuccess: (data) => {
       queryClient.setQueryData(['bot-config', session?.userId], data)
@@ -213,6 +222,7 @@ export default function BotDashboard() {
   const isPrimingData = [
     { data: overview, loading: overviewQuery.isLoading },
     { data: config, loading: configQuery.isLoading },
+    { data: zonesQuery.data ?? null, loading: zonesQuery.isLoading },
     { data: state, loading: stateQuery.isLoading },
     { data: alertSettings, loading: alertSettingsQuery.isLoading },
     { data: activities.length ? activities : null, loading: activityQuery.isLoading },
@@ -245,16 +255,19 @@ export default function BotDashboard() {
         />
         <div className="space-y-6">
           <RuntimeSnapshotCard stats={runtimeStats} />
-          <BotControlsCard
-            config={config}
-            disabled={configQuery.isError}
-            isUpdating={updateConfigMutation.isPending}
-            isManualRunPending={manualRunMutation.isPending}
-            onToggleEnabled={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
-            onToggleAutoClaim={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
-            onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
-            onTriggerRun={() => manualRunMutation.mutate()}
-          />
+        <BotControlsCard
+          config={config}
+          zones={zonesQuery.data ?? []}
+          isZoneLoading={zonesQuery.isLoading}
+          disabled={configQuery.isError}
+          isUpdating={updateConfigMutation.isPending}
+          isManualRunPending={manualRunMutation.isPending}
+          onToggleEnabled={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
+          onToggleAutoClaim={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
+          onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
+          onSelectZone={(zoneId) => updateConfigMutation.mutate({ zoneId })}
+          onTriggerRun={() => manualRunMutation.mutate()}
+        />
           <AlertSettingsCard
             settings={alertSettings}
             isLoading={alertSettingsQuery.isLoading}
