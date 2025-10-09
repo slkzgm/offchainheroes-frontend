@@ -42,6 +42,8 @@ export function BotControlsCard({
   const selectedZoneId = config?.zoneId ?? config?.effectiveZone.id ?? null
   const effectiveZone = config?.effectiveZone
   const zoneDisabled = !!effectiveZone && !effectiveZone.enabled
+  const hasSelectedZoneOption =
+    selectedZoneId !== null && zones.some((zone) => zone.zoneId === selectedZoneId)
 
   return (
     <Card>
