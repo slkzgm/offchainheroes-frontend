@@ -257,7 +257,7 @@ export default function BotDashboard() {
           <RuntimeSnapshotCard stats={runtimeStats} />
         <BotControlsCard
           config={config}
-          zones={zonesQuery.data ?? []}
+          zones={zonesQuery.data?.filter((zone) => zone.enabled) ?? []}
           isZoneLoading={zonesQuery.isLoading}
           disabled={configQuery.isError}
           isUpdating={updateConfigMutation.isPending}
