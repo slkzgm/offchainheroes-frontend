@@ -174,6 +174,7 @@ const en = {
           rarity: 'Rarity',
           owned: 'Owned',
           claimable: 'Claimable today',
+          daily: 'Daily gen',
           total: 'Total',
         },
         noData: 'No bait data available.',

@@ -381,6 +381,11 @@ export interface BotStateResponse {
     balances?: Record<string, unknown>
     claimable?: Record<string, unknown>
     totalGearStaked?: number
+    generation?: {
+      perRarity?: Record<string, number>
+      perAssetType?: Record<string, number>
+      total?: number
+    } | null
   } | null
   marbles?: {
     balance?: number

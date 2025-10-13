@@ -185,9 +185,13 @@ function HeroCard({ hero }: { hero: BotHeroState }) {
 function BaitOverviewTable({
   entries,
   totals,
+  generationPerRarity,
+  generationTotal,
 }: {
   entries: BaitOverviewEntry[]
   totals: { owned: number; claimable: number }
+  generationPerRarity: Map<string, number> | null
+  generationTotal: number | null
 }) {
   const t = useTranslate()
   const rows = entries.filter((entry) => Number.isFinite(entry.rarity.order) || entry.owned + entry.claimable > 0)
@@ -208,6 +212,7 @@ function BaitOverviewTable({
             <TableHead>{t('dashboard.liveState.bait.table.rarity')}</TableHead>
             <TableHead className="text-right">{t('dashboard.liveState.bait.table.owned')}</TableHead>
             <TableHead className="text-right">{t('dashboard.liveState.bait.table.claimable')}</TableHead>
+            <TableHead className="text-right">{t('dashboard.liveState.bait.table.daily')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -228,6 +233,11 @@ function BaitOverviewTable({
               </TableCell>
               <TableCell className="text-right font-semibold text-foreground">{formatCount(entry.owned)}</TableCell>
               <TableCell className="text-right font-semibold text-foreground">{formatCount(entry.claimable)}</TableCell>
+              <TableCell className="text-right font-semibold text-foreground">
+                {generationPerRarity?.has(entry.key.toLowerCase())
+                  ? formatCount(generationPerRarity.get(entry.key.toLowerCase()) ?? 0)
+                  : '—'}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -236,13 +246,15 @@ function BaitOverviewTable({
             <TableCell className="font-semibold">{t('dashboard.liveState.bait.table.total')}</TableCell>
             <TableCell className="text-right font-semibold text-foreground">{formatCount(totals.owned)}</TableCell>
             <TableCell className="text-right font-semibold text-foreground">{formatCount(totals.claimable)}</TableCell>
+            <TableCell className="text-right font-semibold text-foreground">
+              {generationTotal !== null && generationTotal !== undefined ? formatCount(generationTotal) : '—'}
+            </TableCell>
           </TableRow>
         </TableFooter>
       </Table>
     </div>
   )
 }
-
 function SummaryCard({ label, value, hint }: { label: string; value?: number | string | null; hint?: string }) {
   const t = useTranslate()
   const placeholder = t('common.placeholders.notAvailable')
@@ -477,6 +489,22 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
       ),
     [baitDefinitionsQuery.data, state?.bait?.balances, state?.bait?.claimable],
   )
+  const baitGeneration = useMemo(() => {
+    const generation = state?.bait?.generation
+    if (!generation) return null
+
+    const perRarity = new Map<string, number>()
+    for (const [rawKey, value] of Object.entries(generation.perRarity ?? {})) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) continue
+      perRarity.set(rawKey.toLowerCase(), Math.max(0, value))
+    }
+
+    const total = Number.isFinite(generation.total)
+      ? Math.max(0, generation.total as number)
+      : Array.from(perRarity.values()).reduce((sum, value) => sum + value, 0)
+
+    return { perRarity, total }
+  }, [state?.bait?.generation])
   const fishSnapshot = useMemo(
     () =>
       buildFishSnapshot(
@@ -626,7 +654,12 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
                       {t('dashboard.liveState.bait.description')}
                     </span>
                   </div>
-                  <BaitOverviewTable entries={baitOverview.entries} totals={baitOverview.totals} />
+                  <BaitOverviewTable
+                    entries={baitOverview.entries}
+                    totals={baitOverview.totals}
+                    generationPerRarity={baitGeneration?.perRarity ?? null}
+                    generationTotal={baitGeneration?.total ?? null}
+                  />
                   {state?.bait?.totalGearStaked !== undefined && state?.bait?.totalGearStaked !== null ? (
                     <div className="rounded-xl border border-dashed border-border/50 bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
                       {t('dashboard.liveState.bait.totalGearStaked', {

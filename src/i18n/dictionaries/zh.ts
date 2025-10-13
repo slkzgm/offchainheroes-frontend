@@ -172,6 +172,7 @@ const zh: Messages = {
           rarity: '稀有度',
           owned: '库存',
           claimable: '今日可领取',
+          daily: '每日产出',
           total: '合计',
         },
         noData: '暂无诱饵数据。',

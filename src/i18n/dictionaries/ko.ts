@@ -175,6 +175,7 @@ const ko = {
           rarity: '희귀도',
           owned: '보유량',
           claimable: '오늘 수령 가능',
+          daily: '일일 생성',
           total: '합계',
         },
         noData: '미끼 데이터가 없습니다.',
