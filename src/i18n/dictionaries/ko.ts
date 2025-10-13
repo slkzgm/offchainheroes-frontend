@@ -112,6 +112,7 @@ const ko = {
         option: '{{name}} (에너지 {{energy}})',
         active: '현재 구역: {{name}} (에너지 {{energy}})',
         disabledNotice: '(일시적으로 비활성화됨)',
+        disabledTag: '(잠김)',
       },
       lastSuccess: '마지막 성공',
       lastError: '최근 오류',

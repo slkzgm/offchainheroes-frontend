@@ -255,6 +255,7 @@ function BaitOverviewTable({
     </div>
   )
 }
+
 function SummaryCard({ label, value, hint }: { label: string; value?: number | string | null; hint?: string }) {
   const t = useTranslate()
   const placeholder = t('common.placeholders.notAvailable')
