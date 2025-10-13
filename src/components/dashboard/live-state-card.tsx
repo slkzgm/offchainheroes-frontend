@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils'
 import { AlertCircle, RotateCcw } from 'lucide-react'
 import { useTranslate } from '@/i18n/client'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useBaitDefinitions, useFishDefinitions } from '@/hooks/use-game-catalogue'
 
 export interface LiveStateHeroGroup {
   key: string
@@ -213,9 +214,17 @@ function BaitOverviewTable({
           {rows.map((entry) => (
             <TableRow key={entry.key} className="hover:bg-muted/30">
               <TableCell>
-                <Badge variant="outline" className={cn('text-[11px] font-medium capitalize', entry.rarity.accentClass)}>
-                  {entry.label}
-                </Badge>
+                <div className="flex items-center gap-3">
+                  {entry.rarity.image ? (
+                    <Avatar className="h-8 w-8 border border-border/40 bg-background">
+                      <AvatarImage src={entry.rarity.image} alt={entry.label} />
+                      <AvatarFallback className="text-xs font-medium">{entry.label.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  ) : null}
+                  <Badge variant="outline" className={cn('text-[11px] font-medium capitalize', entry.rarity.accentClass)}>
+                    {entry.label}
+                  </Badge>
+                </div>
               </TableCell>
               <TableCell className="text-right font-semibold text-foreground">{formatCount(entry.owned)}</TableCell>
               <TableCell className="text-right font-semibold text-foreground">{formatCount(entry.claimable)}</TableCell>
@@ -454,16 +463,34 @@ function DailyDealsProgressCard({
 
 export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: LiveStateCardProps) {
   const t = useTranslate()
+  const baitDefinitionsQuery = useBaitDefinitions()
+  const fishDefinitionsQuery = useFishDefinitions()
   const hasState = Boolean(state)
   const capturedAt = useMemo(() => (state?.timestamp ? formatRelative(state.timestamp) : null), [state?.timestamp])
 
   const baitOverview = useMemo(
-    () => buildBaitOverview(state?.bait?.balances ?? null, state?.bait?.claimable ?? null),
-    [state?.bait?.balances, state?.bait?.claimable],
+    () =>
+      buildBaitOverview(
+        state?.bait?.balances ?? null,
+        state?.bait?.claimable ?? null,
+        baitDefinitionsQuery.data ?? [],
+      ),
+    [baitDefinitionsQuery.data, state?.bait?.balances, state?.bait?.claimable],
   )
   const fishSnapshot = useMemo(
-    () => buildFishSnapshot(state?.fish?.regular ?? null, state?.fish?.dailyDeals ?? null, state?.fish?.dealsSoldToday ?? null),
-    [state?.fish?.dailyDeals, state?.fish?.dealsSoldToday, state?.fish?.regular],
+    () =>
+      buildFishSnapshot(
+        fishDefinitionsQuery.data ?? [],
+        state?.fish?.regular ?? null,
+        state?.fish?.dailyDeals ?? null,
+        state?.fish?.dealsSoldToday ?? null,
+      ),
+    [
+      fishDefinitionsQuery.data,
+      state?.fish?.dailyDeals,
+      state?.fish?.dealsSoldToday,
+      state?.fish?.regular,
+    ],
   )
   const dailyReset = useMemo(() => getDailyResetInfo(state?.timestamp), [state?.timestamp])
   const dailyResetCountdown = formatDuration(dailyReset.secondsRemaining)

@@ -1,4 +1,5 @@
 // path: src/lib/live-state.ts
+import type { CatalogueBaitRecord } from '@/lib/api'
 export type RarityTier = 'common' | 'uncommon' | 'rare' | 'epic' | 'heroic' | 'legendary' | 'mythic'
 
 export interface BaitDefinition {
@@ -7,6 +8,7 @@ export interface BaitDefinition {
   order: number
   aliases: readonly string[]
   accentClass: string
+  image?: string
 }
 
 export interface BaitOverviewEntry {
@@ -21,7 +23,12 @@ export interface FishDefinition {
   id: number
   label: string
   rarity: RarityTier
+  description?: string
+  image?: string
   unitValue?: number
+  slug?: string
+  zoneIds?: readonly number[]
+  tags?: readonly string[]
 }
 
 export interface FishInventoryRow {
@@ -43,7 +50,7 @@ export interface DailyDealRow {
   remaining: number
 }
 
-const BAIT_DEFINITIONS: readonly BaitDefinition[] = [
+const BASE_BAIT_DEFINITIONS: readonly BaitDefinition[] = [
   {
     key: 'mythic',
     label: 'Mythic',
@@ -97,7 +104,7 @@ const BAIT_DEFINITIONS: readonly BaitDefinition[] = [
 
 const BAIT_ALIAS_LOOKUP = (() => {
   const map = new Map<string, BaitDefinition>()
-  for (const definition of BAIT_DEFINITIONS) {
+  for (const definition of BASE_BAIT_DEFINITIONS) {
     for (const alias of definition.aliases) {
       map.set(alias.toLowerCase(), definition)
     }
@@ -140,7 +147,7 @@ function createFallbackDefinition(key: string): BaitDefinition {
 }
 
 export function listBaitDefinitions(): readonly BaitDefinition[] {
-  return BAIT_DEFINITIONS
+  return BASE_BAIT_DEFINITIONS
 }
 
 export function findBaitDefinition(rawKey: string): BaitDefinition | undefined {
@@ -155,20 +162,42 @@ export function findBaitDefinition(rawKey: string): BaitDefinition | undefined {
 export function buildBaitOverview(
   ownedRecord: Record<string, unknown> | null | undefined,
   claimableRecord: Record<string, unknown> | null | undefined,
+  catalogue?: readonly CatalogueBaitRecord[] | null,
 ): { entries: BaitOverviewEntry[]; totals: { owned: number; claimable: number } } {
   const entriesMap = new Map<string, BaitOverviewEntry>()
 
+  const remoteByRarity = new Map<string, CatalogueBaitRecord>()
+  for (const entry of catalogue ?? []) {
+    if (!entry?.rarity) continue
+    remoteByRarity.set(entry.rarity.toLowerCase(), entry)
+  }
+
+  const enrichDefinition = (definition: BaitDefinition): BaitDefinition => {
+    const remote = remoteByRarity.get(definition.key.toLowerCase())
+    if (!remote) return definition
+    return {
+      ...definition,
+      label: remote.name,
+      image: remote.image,
+    }
+  }
+
   const getOrCreateEntry = (definition: BaitDefinition): BaitOverviewEntry => {
-    const existing = entriesMap.get(definition.key)
-    if (existing) return existing
+    const enriched = enrichDefinition(definition)
+    const existing = entriesMap.get(enriched.key)
+    if (existing) {
+      existing.label = enriched.label
+      existing.rarity = enriched
+      return existing
+    }
     const entry: BaitOverviewEntry = {
-      key: definition.key,
-      label: definition.label,
-      rarity: definition,
+      key: enriched.key,
+      label: enriched.label,
+      rarity: enriched,
       owned: 0,
       claimable: 0,
     }
-    entriesMap.set(definition.key, entry)
+    entriesMap.set(enriched.key, entry)
     return entry
   }
 
@@ -178,15 +207,20 @@ export function buildBaitOverview(
   ) => {
     for (const [rawKey, value] of Object.entries(record ?? {})) {
       if (typeof value !== 'number' || !Number.isFinite(value)) continue
-      const definition = findBaitDefinition(rawKey) ?? createFallbackDefinition(rawKey)
-      if (!Number.isFinite(definition.order) && value === 0) continue
-      const entry = getOrCreateEntry(definition)
+      const baseDefinition = findBaitDefinition(rawKey) ?? createFallbackDefinition(rawKey)
+      if (!Number.isFinite(baseDefinition.order) && value === 0) continue
+      const entry = getOrCreateEntry(baseDefinition)
       entry[target] += value
     }
   }
 
-  for (const definition of BAIT_DEFINITIONS) {
+  for (const definition of BASE_BAIT_DEFINITIONS) {
     getOrCreateEntry(definition)
+  }
+
+  for (const entry of remoteByRarity.values()) {
+    const base = findBaitDefinition(entry.rarity) ?? createFallbackDefinition(entry.rarity)
+    getOrCreateEntry(base)
   }
 
   normaliseRecord(ownedRecord, 'owned')
@@ -209,22 +243,6 @@ export function buildBaitOverview(
   return { entries, totals }
 }
 
-const FISH_DEFINITIONS: readonly FishDefinition[] = [
-  { id: 1, label: 'Minner', rarity: 'common', unitValue: 8 },
-  { id: 2, label: 'Shiny', rarity: 'common', unitValue: 8 },
-  { id: 3, label: 'Milly', rarity: 'common', unitValue: 9 },
-  { id: 4, label: 'Paty', rarity: 'common', unitValue: 10 },
-  { id: 5, label: 'Dany', rarity: 'common', unitValue: 12 },
-  { id: 6, label: 'Beam', rarity: 'uncommon', unitValue: 18 },
-  { id: 7, label: 'Cheb', rarity: 'uncommon', unitValue: 20 },
-  { id: 8, label: 'Xander', rarity: 'uncommon', unitValue: 22 },
-  { id: 9, label: 'Spike', rarity: 'uncommon', unitValue: 24 },
-  { id: 10, label: 'Boomer', rarity: 'epic', unitValue: 49 },
-  { id: 11, label: 'Pudgy Fish', rarity: 'mythic', unitValue: 200 },
-] as const
-
-const FISH_LOOKUP = new Map<number, FishDefinition>(FISH_DEFINITIONS.map((entry) => [entry.id, entry]))
-
 function createFallbackFishDefinition(id: number): FishDefinition {
   return {
     id,
@@ -233,15 +251,8 @@ function createFallbackFishDefinition(id: number): FishDefinition {
   }
 }
 
-export function listFishDefinitions(): readonly FishDefinition[] {
-  return FISH_DEFINITIONS
-}
-
-export function findFishDefinition(id: number): FishDefinition | undefined {
-  return FISH_LOOKUP.get(id)
-}
-
 export function buildFishSnapshot(
+  definitions: readonly FishDefinition[],
   inventory?: Record<string, number | undefined> | null,
   dailyDeals?: Record<string, number | undefined> | null,
   soldToday?: Record<string, number | undefined> | null,
@@ -257,13 +268,18 @@ export function buildFishSnapshot(
 
   const rowsMap = new Map<number, FishInventoryRow>()
 
-  const getDefinition = (id: number): FishDefinition => findFishDefinition(id) ?? createFallbackFishDefinition(id)
+  const lookup = new Map<number, FishDefinition>()
+  for (const definition of definitions ?? []) {
+    lookup.set(definition.id, definition)
+  }
+
+  const getDefinition = (id: number): FishDefinition => lookup.get(id) ?? createFallbackFishDefinition(id)
 
   const ensureRow = (id: number): FishInventoryRow => {
     const existing = rowsMap.get(id)
     if (existing) return existing
     const definition = getDefinition(id)
-    const unitValue = definition.unitValue ?? 0
+    const unitValue = typeof definition.unitValue === 'number' ? definition.unitValue : 0
     const row: FishInventoryRow = {
       definition,
       quantity: 0,
@@ -285,7 +301,7 @@ export function buildFishSnapshot(
     }
   }
 
-  for (const definition of FISH_DEFINITIONS) {
+  for (const definition of definitions ?? []) {
     ensureRow(definition.id)
   }
 

@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSession } from '@/hooks/use-session'
+import { useFishingZones } from '@/hooks/use-game-catalogue'
 import {
   getUserOverview,
   getBotConfig,
@@ -18,7 +19,6 @@ import {
   disableTelegramAlerts,
   updateAlertPreferences,
   updateAlertLocale,
-  listFishingZones,
   type BotConfigurationResponse,
   type BotStateResponse,
   type BotLogEntry,
@@ -26,7 +26,6 @@ import {
   type UserOverviewResponse,
   type AlertSettingsResponse,
   type TelegramLinkResponse,
-  type FishingZone,
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { RuntimeSnapshotCard, type RuntimeStat } from '@/components/dashboard/runtime-snapshot-card'
@@ -57,11 +56,8 @@ export default function BotDashboard() {
     enabled: isAuthenticated,
   })
 
-  const zonesQuery = useQuery<FishingZone[], Error>({
-    queryKey: ['bot-zones'],
-    queryFn: () => listFishingZones(),
+  const fishingZonesQuery = useFishingZones({
     enabled: isAuthenticated,
-    staleTime: 60 * 60 * 1000,
   })
 
   const logsQuery = useQuery<BotLogEntry[], Error>({
@@ -156,9 +152,11 @@ export default function BotDashboard() {
   const logs = logsQuery.data ?? []
   const activities = activityQuery.data ?? []
   const alertSettings = alertSettingsQuery.data
+  const fishingZones = fishingZonesQuery.data ?? []
 
   const sessionStatus = overview?.bot
   const isSessionLoading = overviewQuery.isLoading || configQuery.isLoading
+  const controlsDisabled = !sessionStatus?.hasCookie || configQuery.isError
 
   const heroGroups: LiveStateHeroGroup[] = useMemo(() => {
     if (!state?.heroes) return []
@@ -222,7 +220,7 @@ export default function BotDashboard() {
   const isPrimingData = [
     { data: overview, loading: overviewQuery.isLoading },
     { data: config, loading: configQuery.isLoading },
-    { data: zonesQuery.data ?? null, loading: zonesQuery.isLoading },
+    { data: fishingZones, loading: fishingZonesQuery.isLoading },
     { data: state, loading: stateQuery.isLoading },
     { data: alertSettings, loading: alertSettingsQuery.isLoading },
     { data: activities.length ? activities : null, loading: activityQuery.isLoading },
@@ -255,19 +253,19 @@ export default function BotDashboard() {
         />
         <div className="space-y-6">
           <RuntimeSnapshotCard stats={runtimeStats} />
-        <BotControlsCard
-          config={config}
-          zones={zonesQuery.data?.filter((zone) => zone.enabled) ?? []}
-          isZoneLoading={zonesQuery.isLoading}
-          disabled={configQuery.isError}
-          isUpdating={updateConfigMutation.isPending}
-          isManualRunPending={manualRunMutation.isPending}
-          onToggleEnabled={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
-          onToggleAutoClaim={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
-          onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
-          onSelectZone={(zoneId) => updateConfigMutation.mutate({ zoneId })}
-          onTriggerRun={() => manualRunMutation.mutate()}
-        />
+          <BotControlsCard
+            config={config}
+            zones={fishingZones.filter((zone) => zone.enabled)}
+            isZoneLoading={fishingZonesQuery.isLoading}
+            disabled={controlsDisabled}
+            isUpdating={updateConfigMutation.isPending}
+            isManualRunPending={manualRunMutation.isPending}
+            onToggleEnabled={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
+            onToggleAutoClaim={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
+            onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
+            onSelectZone={(zoneId) => updateConfigMutation.mutate({ zoneId })}
+            onTriggerRun={() => manualRunMutation.mutate()}
+          />
           <AlertSettingsCard
             settings={alertSettings}
             isLoading={alertSettingsQuery.isLoading}

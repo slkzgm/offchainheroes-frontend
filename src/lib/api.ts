@@ -209,8 +209,52 @@ export interface FishingZone {
   }
 }
 
+export type FishRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'heroic' | 'legendary' | 'mythic'
+
+export interface FishDefinitionRecord {
+  fishId: number
+  slug: string
+  name: string
+  description: string
+  rarity: FishRarity
+  image: string
+  unitValue: number | null
+  zoneIds: readonly number[]
+  tags: readonly string[]
+}
+
+export interface CatalogueBaitRecord {
+  id: number
+  name: string
+  rarity: FishRarity
+  image: string
+  weaponBait: number
+  helmetBait: number
+  topBait: number
+  legsBait: number
+}
+
+export interface GameCatalogueResponse {
+  revision: string
+  fish: readonly FishDefinitionRecord[]
+  fishingZones: readonly FishingZone[]
+  bait: readonly CatalogueBaitRecord[]
+}
+
 export async function listFishingZones(): Promise<FishingZone[]> {
   return http('/bot/zones', {
+    method: 'GET',
+  })
+}
+
+export async function getFishDefinitions(): Promise<FishDefinitionRecord[]> {
+  return http('/game/fish/definitions', {
+    method: 'GET',
+  })
+}
+
+export async function getGameCatalogue(): Promise<GameCatalogueResponse> {
+  return http('/game/catalogue', {
     method: 'GET',
   })
 }
