@@ -307,7 +307,30 @@ export function buildFishSnapshot(
 
   applyQuantity(safeInventory)
 
-  const inventoryRows = Array.from(rowsMap.values()).sort((a, b) => a.definition.id - b.definition.id)
+  const rarityOrder = (rarity: RarityTier): number => {
+    switch (rarity) {
+      case 'mythic':
+        return 0
+      case 'legendary':
+        return 1
+      case 'heroic':
+        return 2
+      case 'epic':
+        return 3
+      case 'rare':
+        return 4
+      case 'uncommon':
+        return 5
+      default:
+        return 6
+    }
+  }
+
+  const inventoryRows = Array.from(rowsMap.values()).sort((a, b) => {
+    const rarityDiff = rarityOrder(a.definition.rarity) - rarityOrder(b.definition.rarity)
+    if (rarityDiff !== 0) return rarityDiff
+    return a.definition.id - b.definition.id
+  })
   const inventoryTotals = inventoryRows.reduce(
     (acc, row) => {
       acc.quantity += row.quantity

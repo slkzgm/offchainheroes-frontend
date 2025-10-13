@@ -301,9 +301,17 @@ function FishInventoryTable({ rows, totals }: { rows: FishInventoryRow[]; totals
           {rows.map((row) => (
             <TableRow key={row.definition.id} className={cn('hover:bg-muted/30', !hasInventory && 'opacity-75')}>
               <TableCell>
-                <Badge variant="outline" className={cn('text-[11px] font-medium', rarityAccent(row.definition.rarity))}>
-                  {row.definition.label}
-                </Badge>
+                <div className="flex items-center gap-3">
+                  {row.definition.image ? (
+                    <Avatar className="h-8 w-8 border border-border/40 bg-background">
+                      <AvatarImage src={row.definition.image} alt={row.definition.label} />
+                      <AvatarFallback className="text-xs font-medium">{row.definition.label.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  ) : null}
+                  <Badge variant="outline" className={cn('text-[11px] font-medium', rarityAccent(row.definition.rarity))}>
+                    {row.definition.label}
+                  </Badge>
+                </div>
               </TableCell>
               <TableCell className="text-right font-semibold text-foreground">{formatCount(row.quantity)}</TableCell>
               <TableCell className="text-right text-foreground">

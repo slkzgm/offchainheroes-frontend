@@ -45,11 +45,6 @@ export function BotControlsCard({
   const hasSelectedZoneOption =
     selectedZoneId !== null && zones.some((zone) => zone.zoneId === selectedZoneId)
 
-  const getZoneLabel = (zone: FishingZone): string => {
-    const baseLabel = t('dashboard.controls.zone.option', { name: zone.name, energy: zone.energy })
-    return zone.enabled ? baseLabel : `${baseLabel} ${t('dashboard.controls.zone.disabledTag')}`
-  }
-
   return (
     <Card>
       <CardHeader>
@@ -99,7 +94,7 @@ export function BotControlsCard({
                 </option>
                 {zones.map((zone) => (
                   <option key={zone.zoneId} value={zone.zoneId} disabled={!zone.enabled}>
-                    {getZoneLabel(zone)}
+                    {t('dashboard.controls.zone.option', { name: zone.name, energy: zone.energy })}
                   </option>
                 ))}
                 {!hasSelectedZoneOption && selectedZoneId !== null && effectiveZone ? (

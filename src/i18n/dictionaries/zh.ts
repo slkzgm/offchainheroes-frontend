@@ -109,7 +109,6 @@ const zh: Messages = {
         option: '{{name}}（消耗 {{energy}} 能量）',
         active: '当前区域：{{name}}（消耗 {{energy}} 能量）',
         disabledNotice: '（暂不可用）',
-        disabledTag: '（未解锁）',
       },
       lastSuccess: '上次成功',
       lastError: '上次错误',

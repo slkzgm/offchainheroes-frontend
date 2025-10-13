@@ -111,7 +111,6 @@ const en = {
         option: '{{name}} ({{energy}} energy)',
         active: 'Current zone: {{name}} ({{energy}} energy)',
         disabledNotice: '(temporarily unavailable)',
-        disabledTag: '(locked)',
       },
       lastSuccess: 'Last success',
       lastError: 'Last error',

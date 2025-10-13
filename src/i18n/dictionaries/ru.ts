@@ -113,7 +113,6 @@ const ru: Messages = {
         option: '{{name}} (энергия {{energy}})',
         active: 'Текущая зона: {{name}} (энергия {{energy}})',
         disabledNotice: '(временно недоступно)',
-        disabledTag: '(недоступно)',
       },
       lastSuccess: 'Последний успех',
       lastError: 'Последняя ошибка',
