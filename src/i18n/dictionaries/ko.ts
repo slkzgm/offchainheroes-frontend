@@ -112,6 +112,8 @@ const ko = {
         option: '{{name}} (에너지 {{energy}})',
         active: '현재 구역: {{name}} (에너지 {{energy}})',
         disabledNotice: '(일시적으로 비활성화됨)',
+        fallbackDisabled: '설정한 구역이 비활성화되어 {{name}} (에너지 {{energy}}) 구역으로 대체 실행 중입니다.',
+        fallbackMissing: '설정한 구역이 더 이상 존재하지 않아 {{name}} (에너지 {{energy}}) 구역으로 대체 실행 중입니다.',
       },
       lastSuccess: '마지막 성공',
       lastError: '최근 오류',

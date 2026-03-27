@@ -109,6 +109,8 @@ const zh: Messages = {
         option: '{{name}}（消耗 {{energy}} 能量）',
         active: '当前区域：{{name}}（消耗 {{energy}} 能量）',
         disabledNotice: '（暂不可用）',
+        fallbackDisabled: '已配置区域当前不可用，现改用 {{name}}（消耗 {{energy}} 能量）。',
+        fallbackMissing: '已配置区域已不存在，现改用 {{name}}（消耗 {{energy}} 能量）。',
       },
       lastSuccess: '上次成功',
       lastError: '上次错误',

@@ -155,6 +155,12 @@ export interface BotConfigurationResponse {
     energy: number
     enabled: boolean
   }
+  zoneResolution: {
+    status: 'configured' | 'default' | 'fallback_missing' | 'fallback_disabled'
+    reason: string | null
+    configuredZoneId: number | null
+    effectiveZoneId: number
+  }
   lastSuccessAt: string | null
   lastErrorAt: string | null
   nextCheckHint: string | null

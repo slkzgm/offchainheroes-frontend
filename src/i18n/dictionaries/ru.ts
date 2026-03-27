@@ -113,6 +113,8 @@ const ru: Messages = {
         option: '{{name}} (энергия {{energy}})',
         active: 'Текущая зона: {{name}} (энергия {{energy}})',
         disabledNotice: '(временно недоступно)',
+        fallbackDisabled: 'Выбранная зона отключена. Вместо неё используется {{name}} (энергия {{energy}}).',
+        fallbackMissing: 'Выбранная зона больше не существует. Вместо неё используется {{name}} (энергия {{energy}}).',
       },
       lastSuccess: 'Последний успех',
       lastError: 'Последняя ошибка',

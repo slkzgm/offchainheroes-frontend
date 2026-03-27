@@ -111,6 +111,8 @@ const en = {
         option: '{{name}} ({{energy}} energy)',
         active: 'Current zone: {{name}} ({{energy}} energy)',
         disabledNotice: '(temporarily unavailable)',
+        fallbackDisabled: 'Configured zone is disabled. Using {{name}} ({{energy}} energy) instead.',
+        fallbackMissing: 'Configured zone no longer exists. Using {{name}} ({{energy}} energy) instead.',
       },
       lastSuccess: 'Last success',
       lastError: 'Last error',

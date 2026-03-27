@@ -41,9 +41,16 @@ export function BotControlsCard({
   const t = useTranslate()
   const selectedZoneId = config?.zoneId ?? config?.effectiveZone.id ?? null
   const effectiveZone = config?.effectiveZone
+  const zoneResolution = config?.zoneResolution
   const zoneDisabled = !!effectiveZone && !effectiveZone.enabled
   const hasSelectedZoneOption =
     selectedZoneId !== null && zones.some((zone) => zone.zoneId === selectedZoneId)
+  const zoneFallbackNotice =
+    effectiveZone && zoneResolution?.status === 'fallback_disabled'
+      ? t('dashboard.controls.zone.fallbackDisabled', { name: effectiveZone.name, energy: effectiveZone.energy })
+      : effectiveZone && zoneResolution?.status === 'fallback_missing'
+        ? t('dashboard.controls.zone.fallbackMissing', { name: effectiveZone.name, energy: effectiveZone.energy })
+        : null
 
   return (
     <Card>
@@ -118,6 +125,11 @@ export function BotControlsCard({
                     {t('dashboard.controls.zone.disabledNotice')}
                   </span>
                 ) : null}
+              </p>
+            ) : null}
+            {zoneFallbackNotice ? (
+              <p className="text-xs text-amber-600">
+                {zoneFallbackNotice}
               </p>
             ) : null}
           </div>
