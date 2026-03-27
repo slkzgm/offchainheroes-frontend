@@ -131,6 +131,7 @@ export interface UserOverviewResponse {
     discordId?: string | null
     twitterHandle?: string | null
     avatarId?: number | null
+    profilePictureUrl?: string | null
     lastSignedIn?: string | null
     createdAt?: string | null
     updatedAt?: string | null
@@ -411,6 +412,7 @@ export interface BotStateResponse {
 
 export interface BotHeroState {
   id: number | string
+  imageUrl?: string
   energy?: number
   energyEstimated?: number
   maxEnergy?: number

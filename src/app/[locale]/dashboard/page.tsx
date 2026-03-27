@@ -14,7 +14,7 @@ import { getUserOverview, type UserOverviewResponse } from '@/lib/api'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAvatarUrl, truncateAddress } from '@/lib/format'
+import { truncateAddress } from '@/lib/format'
 import { useI18n } from '@/i18n/client'
 export default function DashboardPage() {
   const router = useRouter()
@@ -47,10 +47,7 @@ export default function DashboardPage() {
     return fallback !== '—' ? fallback : t('dashboard.page.fallbackPilot')
   }, [overviewQuery.data?.sessionUser?.username, session?.address, t])
 
-  const avatarUrl = useMemo(
-    () => getAvatarUrl(overviewQuery.data?.sessionUser?.avatarId ?? undefined),
-    [overviewQuery.data?.sessionUser?.avatarId],
-  )
+  const avatarUrl = overviewQuery.data?.sessionUser?.profilePictureUrl ?? undefined
 
   if (!isMounted || isLoading) {
     return <DashboardPageSkeleton label={t('dashboard.page.preparing')} />

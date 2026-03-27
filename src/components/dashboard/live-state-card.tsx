@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { BotHeroState, BotStateResponse } from '@/lib/api'
-import { formatDuration, formatRelative, getAvatarUrl } from '@/lib/format'
+import { formatDuration, formatRelative } from '@/lib/format'
 import {
   buildBaitOverview,
   buildFishSnapshot,
@@ -70,8 +70,7 @@ function getDailyResetInfo(timestamp?: string | null) {
 
 function HeroCard({ hero }: { hero: BotHeroState }) {
   const t = useTranslate()
-  const heroId = typeof hero.id === 'number' ? hero.id : Number.parseInt(String(hero.id), 10)
-  const heroAvatar = Number.isFinite(heroId) ? getAvatarUrl(heroId) : undefined
+  const heroAvatar = hero.imageUrl ?? undefined
   const energyCurrent = hero.energyEstimated ?? hero.energy ?? 0
   const energyMax = hero.maxEnergy ?? 0
   const energyLabel = energyMax > 0 ? `${energyCurrent} / ${energyMax}` : '—'

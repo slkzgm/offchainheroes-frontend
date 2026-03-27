@@ -43,8 +43,3 @@ export function truncateAddress(value?: string | null, size = 4): string {
   if (normalized.length <= size * 2) return normalized
   return `${normalized.slice(0, size + 2)}…${normalized.slice(-size)}`
 }
-
-export function getAvatarUrl(avatarId?: number | null): string | undefined {
-  if (avatarId === undefined || avatarId === null) return undefined
-  return `https://och.slkzgm.com/api/heroes/images/${avatarId}.png`
-}
