@@ -131,6 +131,7 @@ export interface UserOverviewResponse {
     discordId?: string | null
     twitterHandle?: string | null
     avatarId?: number | null
+    avatarImageUrl?: string | null
     profilePictureUrl?: string | null
     lastSignedIn?: string | null
     createdAt?: string | null

@@ -47,7 +47,10 @@ export default function DashboardPage() {
     return fallback !== '—' ? fallback : t('dashboard.page.fallbackPilot')
   }, [overviewQuery.data?.sessionUser?.username, session?.address, t])
 
-  const avatarUrl = overviewQuery.data?.sessionUser?.profilePictureUrl ?? undefined
+  const avatarUrl =
+    overviewQuery.data?.sessionUser?.avatarImageUrl ??
+    overviewQuery.data?.sessionUser?.profilePictureUrl ??
+    undefined
 
   if (!isMounted || isLoading) {
     return <DashboardPageSkeleton label={t('dashboard.page.preparing')} />
