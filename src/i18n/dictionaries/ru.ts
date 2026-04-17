@@ -77,7 +77,8 @@ const ru: Messages = {
       },
       unauthenticated: {
         title: 'Подключитесь, чтобы увидеть панель',
-        description: 'Авторизуйтесь на лендинге, чтобы получить доступ к настройкам, состоянию и логам.',
+        description:
+          'Авторизуйтесь на лендинге, чтобы получить доступ к настройкам, состоянию и логам.',
       },
       heroGroups: {
         active: 'Активны ({{count}})',
@@ -113,8 +114,10 @@ const ru: Messages = {
         option: '{{name}} (энергия {{energy}})',
         active: 'Текущая зона: {{name}} (энергия {{energy}})',
         disabledNotice: '(временно недоступно)',
-        fallbackDisabled: 'Выбранная зона отключена. Вместо неё используется {{name}} (энергия {{energy}}).',
-        fallbackMissing: 'Выбранная зона больше не существует. Вместо неё используется {{name}} (энергия {{energy}}).',
+        fallbackDisabled:
+          'Выбранная зона отключена. Вместо неё используется {{name}} (энергия {{energy}}).',
+        fallbackMissing:
+          'Выбранная зона больше не существует. Вместо неё используется {{name}} (энергия {{energy}}).',
       },
       lastSuccess: 'Последний успех',
       lastError: 'Последняя ошибка',
@@ -157,11 +160,23 @@ const ru: Messages = {
       inventory: {
         fishTab: 'Рыба',
         baitTab: 'Приманки',
+        keysTab: 'Ключи',
         fishSectionTitle: 'Запасы рыбы',
         fishSectionDescription: 'Запасы и оценка стоимости при моментальной продаже.',
+        keysSectionTitle: 'Инвентарь Worlds Eve',
+        keysSectionDescription: 'Специальные балансы, которые ведутся отдельно от рыбы.',
         totalEstimatedValue: 'Оценочная стоимость: {{value}} Marble.',
         dealsBreakdown: 'Детализация дневных предложений',
         noDeals: 'Сейчас нет доступных предложений. Проверьте после следующего сброса.',
+        keysTable: {
+          asset: 'Актив',
+          quantity: 'Количество',
+        },
+        keysAssets: {
+          eveKeys: 'Eve Keys',
+          amber: 'Янтарь',
+          raffleTickets: 'Билеты розыгрыша',
+        },
         table: {
           fish: 'Рыба',
           quantity: 'Количество',
@@ -231,6 +246,8 @@ const ru: Messages = {
         heroes: 'Герои',
         nextCheck: 'Следующая проверка',
         fish: 'Рыба',
+        eveKeys: 'Eve Keys',
+        keyBalance: 'Баланс ключей',
         estMarbles: 'Оценка Marble',
         baitClaimed: 'Собранная приманка',
         marbles: 'Marble',
@@ -262,7 +279,8 @@ const ru: Messages = {
         notLinked: 'Telegram не подключён',
         connectedDescription: 'Уведомления отправляются в {{destination}}',
         linkedAt: 'Подключено {{time}}',
-        unlinkedDescription: 'Создайте безопасную ссылку, чтобы подтвердить аккаунт Telegram и начать получать уведомления.',
+        unlinkedDescription:
+          'Создайте безопасную ссылку, чтобы подтвердить аккаунт Telegram и начать получать уведомления.',
         disable: 'Отключить',
         newLink: 'Новая ссылка',
         linkTelegram: 'Подключить Telegram',
@@ -272,17 +290,20 @@ const ru: Messages = {
         openTelegram: 'Открыть Telegram',
         expires: 'Истекает {{time}}',
         preferencesTitle: 'Настройки уведомлений',
-        preferencesUnavailable: 'Настройки недоступны. Подключите Telegram, чтобы активировать каналы.',
+        preferencesUnavailable:
+          'Настройки недоступны. Подключите Telegram, чтобы активировать каналы.',
         toggleOn: 'Вкл.',
         toggleOff: 'Выкл.',
-        syncInfo: 'Уведомления синхронизируются на всех устройствах. При необходимости создайте ссылку заново.',
+        syncInfo:
+          'Уведомления синхронизируются на всех устройствах. При необходимости создайте ссылку заново.',
         localeTitle: 'Язык уведомлений',
         localeDescription: 'Уведомления Telegram будут отправляться на {{language}}.',
         localeDisabled: 'Подключите Telegram, чтобы выбрать язык уведомлений.',
         localeFallback: '—',
       },
       toasts: {
-        linkGenerated: 'Ссылка Telegram создана. Отправьте /start в Telegram, чтобы завершить связку.',
+        linkGenerated:
+          'Ссылка Telegram создана. Отправьте /start в Telegram, чтобы завершить связку.',
         disabled: 'Уведомления Telegram отключены',
         copied: 'Стартовый параметр скопирован',
       },
@@ -385,7 +406,8 @@ const ru: Messages = {
   landing: {
     header: {
       heroHeading: 'Получите доступ к панели автоматизации',
-      heroDescription: 'Подключите Abstract-кошелёк и авторизуйтесь, чтобы управлять стратегиями и метриками.',
+      heroDescription:
+        'Подключите Abstract-кошелёк и авторизуйтесь, чтобы управлять стратегиями и метриками.',
     },
     wallet: {
       connecting: 'Подключаем…',

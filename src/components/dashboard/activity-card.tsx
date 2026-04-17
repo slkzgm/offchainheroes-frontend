@@ -20,7 +20,12 @@ interface ActivityCardProps {
   onRefresh: () => void
 }
 
-export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }: ActivityCardProps) {
+export function ActivityCard({
+  activities,
+  isLoading,
+  errorMessage,
+  onRefresh,
+}: ActivityCardProps) {
   const t = useTranslate()
   const activityTypeLabels = useMemo(
     () => ({
@@ -32,7 +37,7 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
       bot_disabled: t('dashboard.activity.types.bot_disabled'),
       global_announcement: t('dashboard.activity.types.global_announcement'),
     }),
-    [t],
+    [t]
   )
 
   const formatActivityType = (type: BotActivityEntry['type']) => activityTypeLabels[type] ?? type
@@ -42,10 +47,22 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
       <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-base font-semibold">{t('dashboard.activity.title')}</CardTitle>
-          <CardDescription className="text-xs">{t('dashboard.activity.description')}</CardDescription>
+          <CardDescription className="text-xs">
+            {t('dashboard.activity.description')}
+          </CardDescription>
         </div>
-        <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2" disabled={isLoading}>
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRefresh}
+          className="gap-2"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RotateCcw className="h-4 w-4" />
+          )}
           {t('common.actions.refresh')}
         </Button>
       </CardHeader>
@@ -87,7 +104,9 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
                         {formatDate(activity.occurredAt)}
                       </time>
                     </div>
-                    <div className="text-muted-foreground">{formatRelative(activity.occurredAt)}</div>
+                    <div className="text-muted-foreground">
+                      {formatRelative(activity.occurredAt)}
+                    </div>
                   </div>
 
                   <div className="text-sm font-semibold text-foreground">{activity.title}</div>
@@ -99,7 +118,9 @@ export function ActivityCard({ activities, isLoading, errorMessage, onRefresh }:
                   <Highlights activity={activity} />
 
                   <details className="text-xs text-muted-foreground">
-                    <summary className="cursor-pointer select-none">{t('dashboard.activity.rawData')}</summary>
+                    <summary className="cursor-pointer select-none">
+                      {t('dashboard.activity.rawData')}
+                    </summary>
                     <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-muted/40 p-2 text-[11px] leading-relaxed text-foreground">
                       {JSON.stringify(activity.data, null, 2)}
                     </pre>
@@ -138,7 +159,10 @@ function Highlights({ activity }: { activity: BotActivityEntry }) {
   )
 }
 
-function deriveHighlights(activity: BotActivityEntry, t: ReturnType<typeof useTranslate>): HighlightItem[] {
+function deriveHighlights(
+  activity: BotActivityEntry,
+  t: ReturnType<typeof useTranslate>
+): HighlightItem[] {
   const entries: HighlightItem[] = []
   const data = activity.data ?? {}
   const placeholder = t('common.placeholders.notAvailable')
@@ -152,7 +176,10 @@ function deriveHighlights(activity: BotActivityEntry, t: ReturnType<typeof useTr
         value: heroIds ? String(heroIds) : placeholder,
       })
       if (nextCheck) {
-        entries.push({ label: t('dashboard.activity.highlights.nextCheck'), value: formatRelative(nextCheck) })
+        entries.push({
+          label: t('dashboard.activity.highlights.nextCheck'),
+          value: formatRelative(nextCheck),
+        })
       }
       break
     }
@@ -161,6 +188,8 @@ function deriveHighlights(activity: BotActivityEntry, t: ReturnType<typeof useTr
       const totalFish = coerceNumber(summary.totalFish)
       const rewardedHeroes = coerceNumber(summary.rewardedHeroCount)
       const estimated = coerceNumber(summary.estimatedRegularValue)
+      const keysDropped = coerceNumber(summary.keysDropped)
+      const worldKeysBalance = coerceNumber(summary.worldKeysBalance)
       entries.push({
         label: t('dashboard.activity.highlights.heroes'),
         value: rewardedHeroes ? String(rewardedHeroes) : placeholder,
@@ -169,8 +198,23 @@ function deriveHighlights(activity: BotActivityEntry, t: ReturnType<typeof useTr
         label: t('dashboard.activity.highlights.fish'),
         value: totalFish ? String(totalFish) : placeholder,
       })
+      if (keysDropped && keysDropped > 0) {
+        entries.push({
+          label: t('dashboard.activity.highlights.eveKeys'),
+          value: String(keysDropped),
+        })
+      }
+      if (worldKeysBalance !== null) {
+        entries.push({
+          label: t('dashboard.activity.highlights.keyBalance'),
+          value: String(worldKeysBalance),
+        })
+      }
       if (estimated && estimated > 0) {
-        entries.push({ label: t('dashboard.activity.highlights.estMarbles'), value: String(estimated) })
+        entries.push({
+          label: t('dashboard.activity.highlights.estMarbles'),
+          value: String(estimated),
+        })
       }
       break
     }
@@ -196,7 +240,7 @@ function deriveHighlights(activity: BotActivityEntry, t: ReturnType<typeof useTr
       break
     }
     case 'bot_error': {
-      const message = typeof data.message === 'string' ? data.message : activity.description ?? ''
+      const message = typeof data.message === 'string' ? data.message : (activity.description ?? '')
       const disable = data.disable === true
       entries.push({
         label: t('dashboard.activity.highlights.error'),
@@ -212,7 +256,8 @@ function deriveHighlights(activity: BotActivityEntry, t: ReturnType<typeof useTr
     }
     case 'bot_disabled': {
       const defaultReason = t('dashboard.activity.highlights.automationPaused')
-      const reason = typeof data.message === 'string' ? data.message : activity.description ?? defaultReason
+      const reason =
+        typeof data.message === 'string' ? data.message : (activity.description ?? defaultReason)
       entries.push({
         label: t('dashboard.activity.highlights.status'),
         value: t('dashboard.activity.highlights.disabledValue'),

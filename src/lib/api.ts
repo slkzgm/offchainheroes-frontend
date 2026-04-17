@@ -19,7 +19,11 @@ async function attemptRefresh(): Promise<boolean> {
   }
 }
 
-async function fetchWithAuth(path: string, init: RequestInit = {}, retryAuth = true): Promise<Response> {
+async function fetchWithAuth(
+  path: string,
+  init: RequestInit = {},
+  retryAuth = true
+): Promise<Response> {
   const { headers, body, ...rest } = init
   const mergedHeaders = new Headers(headers ?? {})
   if (body && !(body instanceof FormData) && !mergedHeaders.has('content-type')) {
@@ -68,10 +72,7 @@ async function http<T>(path: string, init: RequestInit = {}, config: HttpConfig 
   return undefined as T
 }
 
-export async function prepareSiwe(payload: {
-  address: string
-  chainId: number
-}): Promise<{
+export async function prepareSiwe(payload: { address: string; chainId: number }): Promise<{
   message: string
   nonce: string
   ttl: number
@@ -88,7 +89,10 @@ export async function prepareSiwe(payload: {
   })
 }
 
-export async function verifySiwe(payload: { message: string; signature: string }): Promise<{ address: string }> {
+export async function verifySiwe(payload: {
+  message: string
+  signature: string
+}): Promise<{ address: string }> {
   return http('/auth/verify', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -191,7 +195,12 @@ export async function getBotConfig(): Promise<BotConfigurationResponse> {
 }
 
 export async function updateBotConfig(
-  payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean; zoneId: number }>,
+  payload: Partial<{
+    isEnabled: boolean
+    autoClaimBait: boolean
+    autoSellFish: boolean
+    zoneId: number
+  }>
 ): Promise<BotConfigurationResponse> {
   return http('/bot/config', {
     method: 'POST',
@@ -404,6 +413,11 @@ export interface BotStateResponse {
     dailyDeals?: Record<string, number>
     dealsSoldToday?: Record<string, number>
   } | null
+  worldsEve?: {
+    worldKeysBalance?: number
+    amberBalance?: number
+    raffleTicketBalance?: number
+  } | null
   heroes?: {
     active: BotHeroState[]
     ready: BotHeroState[]
@@ -522,7 +536,9 @@ export async function disableTelegramAlerts(): Promise<AlertSettingsResponse> {
   })
 }
 
-export async function updateAlertPreferences(preferences: Record<string, boolean>): Promise<AlertSettingsResponse> {
+export async function updateAlertPreferences(
+  preferences: Record<string, boolean>
+): Promise<AlertSettingsResponse> {
   return http('/bot/alerts/preferences', {
     method: 'POST',
     body: JSON.stringify({ preferences }),
