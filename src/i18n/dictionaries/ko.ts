@@ -43,7 +43,8 @@ const ko = {
       clipboardUnavailable: '클립보드를 사용할 수 없습니다',
     },
     info: {
-      sessionSecurity: '세션은 HttpOnly 쿠키에 안전하게 저장됩니다. 지갑 연결을 해제하면 세션이 즉시 삭제됩니다.',
+      sessionSecurity:
+        '세션은 HttpOnly 쿠키에 안전하게 저장됩니다. 지갑 연결을 해제하면 세션이 즉시 삭제됩니다.',
     },
     placeholders: {
       notAvailable: '—',
@@ -76,7 +77,8 @@ const ko = {
       },
       unauthenticated: {
         title: '대시보드를 보려면 연결하세요',
-        description: '랜딩 페이지에서 인증을 완료하면 설정, 실시간 상태, 로그에 접근할 수 있습니다.',
+        description:
+          '랜딩 페이지에서 인증을 완료하면 설정, 실시간 상태, 로그에 접근할 수 있습니다.',
       },
       heroGroups: {
         active: '가동 중 ({{count}})',
@@ -112,8 +114,10 @@ const ko = {
         option: '{{name}} (에너지 {{energy}})',
         active: '현재 구역: {{name}} (에너지 {{energy}})',
         disabledNotice: '(일시적으로 비활성화됨)',
-        fallbackDisabled: '설정한 구역이 비활성화되어 {{name}} (에너지 {{energy}}) 구역으로 대체 실행 중입니다.',
-        fallbackMissing: '설정한 구역이 더 이상 존재하지 않아 {{name}} (에너지 {{energy}}) 구역으로 대체 실행 중입니다.',
+        fallbackDisabled:
+          '설정한 구역이 비활성화되어 {{name}} (에너지 {{energy}}) 구역으로 대체 실행 중입니다.',
+        fallbackMissing:
+          '설정한 구역이 더 이상 존재하지 않아 {{name}} (에너지 {{energy}}) 구역으로 대체 실행 중입니다.',
       },
       lastSuccess: '마지막 성공',
       lastError: '최근 오류',
@@ -156,11 +160,23 @@ const ko = {
       inventory: {
         fishTab: '물고기',
         baitTab: '미끼',
+        keysTab: '키',
         fishSectionTitle: '물고기 인벤토리',
         fishSectionDescription: '지금 매도했을 때 예상되는 마블 가치를 포함한 재고 현황입니다.',
+        keysSectionTitle: 'Worlds Eve 인벤토리',
+        keysSectionDescription: '물고기 재고와 별도로 추적되는 특수 밸런스입니다.',
         totalEstimatedValue: '예상 총 가치: 마블 {{value}}개',
         dealsBreakdown: '데일리 딜 상세',
         noDeals: '현재 이용 가능한 데일리 딜이 없습니다. 다음 초기화 후 다시 확인하세요.',
+        keysTable: {
+          asset: '자산',
+          quantity: '수량',
+        },
+        keysAssets: {
+          eveKeys: 'Eve 키',
+          amber: '앰버',
+          raffleTickets: '래플 티켓',
+        },
         table: {
           fish: '물고기',
           quantity: '수량',
@@ -230,6 +246,8 @@ const ko = {
         heroes: '영웅',
         nextCheck: '다음 점검',
         fish: '물고기',
+        eveKeys: 'Eve 키',
+        keyBalance: '키 잔고',
         estMarbles: '예상 마블',
         baitClaimed: '미끼 수령',
         marbles: '마블',
@@ -274,14 +292,16 @@ const ko = {
         preferencesUnavailable: '설정을 가져올 수 없습니다. 텔레그램을 연결해 채널을 초기화하세요.',
         toggleOn: '켜짐',
         toggleOff: '꺼짐',
-        syncInfo: '알림은 기기 간 자동으로 동기화됩니다. 새 채팅을 인증하려면 언제든지 링크를 재발급하세요.',
+        syncInfo:
+          '알림은 기기 간 자동으로 동기화됩니다. 새 채팅을 인증하려면 언제든지 링크를 재발급하세요.',
         localeTitle: '알림 언어',
         localeDescription: '지원되는 경우 텔레그램 알림이 {{language}}로 전송됩니다.',
         localeDisabled: '텔레그램을 연결하면 알림 언어를 선택할 수 있습니다.',
         localeFallback: '—',
       },
       toasts: {
-        linkGenerated: '텔레그램 링크가 생성되었습니다. 텔레그램에서 /start 명령어를 보내 인증을 완료하세요.',
+        linkGenerated:
+          '텔레그램 링크가 생성되었습니다. 텔레그램에서 /start 명령어를 보내 인증을 완료하세요.',
         disabled: '텔레그램 알림이 비활성화되었습니다',
         copied: '시작 파라미터를 복사했습니다',
       },

@@ -75,7 +75,8 @@ const en = {
       },
       unauthenticated: {
         title: 'Connect to view your dashboard',
-        description: 'Authenticate on the landing page to unlock configuration, live state, and logs.',
+        description:
+          'Authenticate on the landing page to unlock configuration, live state, and logs.',
       },
       heroGroups: {
         active: 'Active ({{count}})',
@@ -111,8 +112,10 @@ const en = {
         option: '{{name}} ({{energy}} energy)',
         active: 'Current zone: {{name}} ({{energy}} energy)',
         disabledNotice: '(temporarily unavailable)',
-        fallbackDisabled: 'Configured zone is disabled. Using {{name}} ({{energy}} energy) instead.',
-        fallbackMissing: 'Configured zone no longer exists. Using {{name}} ({{energy}} energy) instead.',
+        fallbackDisabled:
+          'Configured zone is disabled. Using {{name}} ({{energy}} energy) instead.',
+        fallbackMissing:
+          'Configured zone no longer exists. Using {{name}} ({{energy}} energy) instead.',
       },
       lastSuccess: 'Last success',
       lastError: 'Last error',
@@ -155,11 +158,23 @@ const en = {
       inventory: {
         fishTab: 'Fish',
         baitTab: 'Baits',
+        keysTab: 'Keys',
         fishSectionTitle: 'Fish inventory',
         fishSectionDescription: 'Stock levels with estimated marble value if liquidated now.',
+        keysSectionTitle: 'Worlds Eve inventory',
+        keysSectionDescription: 'Special balances tracked separately from the fish inventory.',
         totalEstimatedValue: 'Total estimated value: {{value}} marbles.',
         dealsBreakdown: 'Daily deals breakdown',
         noDeals: 'No daily deals available right now. Check back after the next reset.',
+        keysTable: {
+          asset: 'Asset',
+          quantity: 'Quantity',
+        },
+        keysAssets: {
+          eveKeys: 'Eve Keys',
+          amber: 'Amber',
+          raffleTickets: 'Raffle Tickets',
+        },
         table: {
           fish: 'Fish',
           quantity: 'Quantity',
@@ -229,6 +244,8 @@ const en = {
         heroes: 'Heroes',
         nextCheck: 'Next check',
         fish: 'Fish',
+        eveKeys: 'Eve Keys',
+        keyBalance: 'Key balance',
         estMarbles: 'Est. marbles',
         baitClaimed: 'Bait claimed',
         marbles: 'Marbles',
@@ -271,7 +288,8 @@ const en = {
         openTelegram: 'Open Telegram',
         expires: 'Expires {{time}}',
         preferencesTitle: 'Notification preferences',
-        preferencesUnavailable: 'Preferences unavailable. Link Telegram to initialise alert channels.',
+        preferencesUnavailable:
+          'Preferences unavailable. Link Telegram to initialise alert channels.',
         toggleOn: 'On',
         toggleOff: 'Off',
         syncInfo:
@@ -282,7 +300,8 @@ const en = {
         localeFallback: '—',
       },
       toasts: {
-        linkGenerated: 'Telegram link generated. Send the /start command in Telegram to finish linking.',
+        linkGenerated:
+          'Telegram link generated. Send the /start command in Telegram to finish linking.',
         disabled: 'Telegram alerts disabled',
         copied: 'Start parameter copied',
       },

@@ -3,7 +3,8 @@ import type { Messages } from '../translator'
 const zh: Messages = {
   metadata: {
     siteName: 'Onchain Superheroes 自动化',
-    description: '使用 Onchain Superheroes 控制中心配置自动化、监控执行并查看 Onchain Heroes 小队的实时遥测数据。',
+    description:
+      '使用 Onchain Superheroes 控制中心配置自动化、监控执行并查看 Onchain Heroes 小队的实时遥测数据。',
     ogDescription: '安全的 Onchain Heroes 自动化管理面板：配置例程、触发运行并实时跟踪表现。',
     ogAlt: 'Onchain Superheroes 自动化控制面板预览图',
     twitterDescription: '借助实时遥测、调度洞察和精简的会话管理掌控 Onchain Heroes 自动化。',
@@ -153,11 +154,23 @@ const zh: Messages = {
       inventory: {
         fishTab: '鱼类',
         baitTab: '诱饵',
+        keysTab: 'Key',
         fishSectionTitle: '鱼类库存',
         fishSectionDescription: '当前库存及立即变现时的 Marble 估值。',
+        keysSectionTitle: 'Worlds Eve 库存',
+        keysSectionDescription: '与鱼类库存分开追踪的特殊余额。',
         totalEstimatedValue: '估算总价值：{{value}} Marble。',
         dealsBreakdown: '每日特卖详情',
         noDeals: '当前没有可用的每日特卖，请在下次重置后查看。',
+        keysTable: {
+          asset: '资产',
+          quantity: '数量',
+        },
+        keysAssets: {
+          eveKeys: 'Eve Key',
+          amber: 'Amber',
+          raffleTickets: '抽奖券',
+        },
         table: {
           fish: '鱼类',
           quantity: '数量',
@@ -227,6 +240,8 @@ const zh: Messages = {
         heroes: '英雄数量',
         nextCheck: '下次检查',
         fish: '鱼类数量',
+        eveKeys: 'Eve Key',
+        keyBalance: 'Key 库存',
         estMarbles: '预估 Marble',
         baitClaimed: '领取诱饵',
         marbles: 'Marble',
