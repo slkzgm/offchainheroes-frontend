@@ -137,17 +137,24 @@ export function AlertSettingsCard({
     [t],
   )
 
-  const linked = settings?.telegram?.linked ?? false
+  const telegram = settings?.telegram
+  const linked = telegram?.linked ?? false
+  const linkedAt = telegram?.linkedAt
+  const preferences = settings?.preferences
 
   useEffect(() => {
     if (!linked) {
+      // Clear stale generated links when Telegram is unlinked by a refresh.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLinkDetails(null)
     }
   }, [linked])
 
   useEffect(() => {
-    setLocalPreferences(settings?.preferences ?? {})
-  }, [settings?.preferences])
+    // Keep local optimistic toggles aligned with server settings after refreshes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalPreferences(preferences ?? {})
+  }, [preferences])
 
   useEffect(() => {
     if (!copied) return
@@ -165,29 +172,28 @@ export function AlertSettingsCard({
   }, [localPreferences, preferenceMetadata])
 
   const linkedAtLabel = useMemo(() => {
-    if (!settings?.telegram?.linkedAt) return null
-    const absolute = formatDate(settings.telegram.linkedAt)
-    const relative = formatRelative(settings.telegram.linkedAt)
+    if (!linkedAt) return null
+    const absolute = formatDate(linkedAt)
+    const relative = formatRelative(linkedAt)
     return relative ? `${absolute} · ${relative}` : absolute
-  }, [settings?.telegram?.linkedAt])
+  }, [linkedAt])
 
   const connectedChatLabel = useMemo(() => {
     if (!linked) return null
-    const telegram = settings?.telegram
     if (!telegram) return null
     if (telegram.label) return telegram.label
     if (telegram.username) return `@${telegram.username}`
     return telegram.chatId ?? t('dashboard.alerts.card.descriptionPlaceholder')
-  }, [linked, settings?.telegram, t])
+  }, [linked, telegram, t])
 
   const preferenceCount = preferenceEntries.length
 
-  const availableLocaleCodes = settings?.telegram?.availableLocales ?? EMPTY_LOCALE_CODES
+  const availableLocaleCodes = telegram?.availableLocales ?? EMPTY_LOCALE_CODES
   const resolvedLocaleCode = useMemo(() => {
     if (!availableLocaleCodes.length) {
-      return (settings?.telegram?.locale ?? 'en').split('-')[0]
+      return (telegram?.locale ?? 'en').split('-')[0]
     }
-    const raw = (settings?.telegram?.locale ?? '').toLowerCase()
+    const raw = (telegram?.locale ?? '').toLowerCase()
     if (!raw) {
       return availableLocaleCodes[0]
     }
@@ -201,7 +207,7 @@ export function AlertSettingsCard({
       return baseMatch
     }
     return availableLocaleCodes[0]
-  }, [availableLocaleCodes, settings?.telegram?.locale])
+  }, [availableLocaleCodes, telegram?.locale])
 
   const localeOptions = useMemo(
     () =>

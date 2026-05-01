@@ -18,8 +18,13 @@ export default function LanguageSwitcher() {
   const [hash, setHash] = useState('')
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setHash(window.location.hash)
+    if (typeof window === 'undefined') return
+    const syncHash = () => setHash(window.location.hash)
+    const frame = requestAnimationFrame(syncHash)
+    window.addEventListener('hashchange', syncHash)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('hashchange', syncHash)
     }
   }, [])
 

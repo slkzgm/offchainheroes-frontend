@@ -1,7 +1,7 @@
 // path: src/app/dashboard/page.tsx
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import ThemeSwitcher from '@/components/theme-switcher'
@@ -19,20 +19,15 @@ import { useI18n } from '@/i18n/client'
 export default function DashboardPage() {
   const router = useRouter()
   const { session, isAuthenticated, isLoading, refetch: refetchSession } = useSession()
-  const [isMounted, setIsMounted] = useState(false)
   const { t, buildHref } = useI18n()
   const homePath = useMemo(() => buildHref('/'), [buildHref])
 
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isMounted || isLoading) return
+    if (isLoading) return
     if (!isAuthenticated) {
       router.replace(homePath)
     }
-  }, [homePath, isMounted, isLoading, isAuthenticated, router])
+  }, [homePath, isLoading, isAuthenticated, router])
 
   const overviewQuery = useQuery<UserOverviewResponse, Error>({
     queryKey: ['user-overview', session?.userId],
@@ -52,7 +47,7 @@ export default function DashboardPage() {
     overviewQuery.data?.sessionUser?.profilePictureUrl ??
     undefined
 
-  if (!isMounted || isLoading) {
+  if (isLoading) {
     return <DashboardPageSkeleton label={t('dashboard.page.preparing')} />
   }
 

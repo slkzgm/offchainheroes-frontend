@@ -667,10 +667,8 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
   const baitDefinitionsQuery = useBaitDefinitions()
   const fishDefinitionsQuery = useFishDefinitions()
   const hasState = Boolean(state)
-  const capturedAt = useMemo(
-    () => (state?.timestamp ? formatRelative(state.timestamp) : null),
-    [state?.timestamp]
-  )
+  const timestamp = state?.timestamp
+  const capturedAt = timestamp ? formatRelative(timestamp) : null
 
   const baitOverview = useMemo(
     () =>
@@ -718,20 +716,19 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
     dailyReset.secondsRemaining > 0
       ? t('dashboard.liveState.summary.countdown.in', { duration: dailyResetCountdown })
       : t('dashboard.liveState.summary.countdown.soon')
-  const worldsEveRows = useMemo(() => {
-    if (!state?.worldsEve) {
-      return []
-    }
+  const worldsEve = state?.worldsEve
+  const worldsEveRows = (() => {
+    if (!worldsEve) return []
 
     const rows = [
       {
         key: 'worldKeysBalance',
         label: t('dashboard.liveState.inventory.keysAssets.eveKeys'),
-        quantity: Math.max(0, Math.trunc(state.worldsEve.worldKeysBalance ?? 0)),
+        quantity: Math.max(0, Math.trunc(worldsEve.worldKeysBalance ?? 0)),
       },
     ]
 
-    const amberBalance = state.worldsEve.amberBalance
+    const amberBalance = worldsEve.amberBalance
     if (typeof amberBalance === 'number' && Number.isFinite(amberBalance) && amberBalance > 0) {
       rows.push({
         key: 'amberBalance',
@@ -740,7 +737,7 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
       })
     }
 
-    const raffleTicketBalance = state.worldsEve.raffleTicketBalance
+    const raffleTicketBalance = worldsEve.raffleTicketBalance
     if (
       typeof raffleTicketBalance === 'number' &&
       Number.isFinite(raffleTicketBalance) &&
@@ -754,7 +751,7 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
     }
 
     return rows
-  }, [state?.worldsEve, t])
+  })()
   const hasWorldsEveInventory = worldsEveRows.length > 0
 
   const captureLabel =

@@ -28,9 +28,11 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
   const t = useTranslate()
 
   const walletConnected = walletStatus === 'connected' && Boolean(address)
+  const hasSessionCookie = status?.hasCookie ?? false
+  const expiresAt = status?.expiresAt
 
   const sessionBadge = useMemo(() => {
-    if (!status?.hasCookie) {
+    if (!status || !hasSessionCookie) {
       return { variant: 'destructive' as const, label: t('dashboard.session.badges.notLinked') }
     }
     if (status.expired) {
@@ -40,13 +42,13 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
       return { variant: 'secondary' as const, label: t('dashboard.session.badges.expiringSoon') }
     }
     return { variant: 'default' as const, label: t('dashboard.session.badges.active') }
-  }, [status, t])
+  }, [hasSessionCookie, status, t])
 
   const expiresLabel = useMemo(() => {
-    if (!status?.expiresAt) return t('common.placeholders.notAvailable')
-    const relative = formatRelative(status.expiresAt)
-    return relative ? `${formatDate(status.expiresAt)} · ${relative}` : formatDate(status.expiresAt)
-  }, [status?.expiresAt, t])
+    if (!expiresAt) return t('common.placeholders.notAvailable')
+    const relative = formatRelative(expiresAt)
+    return relative ? `${formatDate(expiresAt)} · ${relative}` : formatDate(expiresAt)
+  }, [expiresAt, t])
 
   const nextCheckLabel = useMemo(() => {
     const nextAt = config?.nextCheck?.nextCheckAt
@@ -83,17 +85,17 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
       }
       const signature = await walletClient.signMessage({ account, message: prepared.message })
       await verifyBotSession({ message: prepared.message, signature })
-      toast.success(status?.hasCookie ? t('dashboard.session.success.renewed') : t('dashboard.session.success.linked'))
+      toast.success(hasSessionCookie ? t('dashboard.session.success.renewed') : t('dashboard.session.success.linked'))
       await onSessionUpdated?.()
     } catch (error) {
       toast.error(getErrorMessage(error))
     } finally {
       setIsProcessing(false)
     }
-  }, [address, onSessionUpdated, status?.hasCookie, t, walletClient, walletConnected])
+  }, [address, hasSessionCookie, onSessionUpdated, t, walletClient, walletConnected])
 
-  const actionLabel = status?.hasCookie ? t('dashboard.session.actions.renew') : t('dashboard.session.actions.link')
-  const actionIcon = status?.hasCookie ? <RefreshCcw className="h-4 w-4" /> : <Plug className="h-4 w-4" />
+  const actionLabel = hasSessionCookie ? t('dashboard.session.actions.renew') : t('dashboard.session.actions.link')
+  const actionIcon = hasSessionCookie ? <RefreshCcw className="h-4 w-4" /> : <Plug className="h-4 w-4" />
 
   return (
     <Card>
