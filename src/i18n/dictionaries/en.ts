@@ -393,6 +393,8 @@ const en = {
       actions: {
         heartbeat: 'Heartbeat',
         claim_bait: 'Claim bait',
+        item_crafted: 'Craft item',
+        energy_restored: 'Restore energy',
         fish_sold: 'Sell daily-deal fish',
         fish_loot: 'Fishing rewards',
         error: 'Error',
