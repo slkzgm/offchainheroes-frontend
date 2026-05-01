@@ -57,6 +57,8 @@ export function LogsCard({ logs, isLoading, errorMessage, onRefresh }: LogsCardP
     () => ({
       heartbeat: t('dashboard.logs.actions.heartbeat'),
       claim_bait: t('dashboard.logs.actions.claim_bait'),
+      item_crafted: t('dashboard.logs.actions.item_crafted'),
+      energy_restored: t('dashboard.logs.actions.energy_restored'),
       fish_sold: t('dashboard.logs.actions.fish_sold'),
       fish_loot: t('dashboard.logs.actions.fish_loot'),
       error: t('dashboard.logs.actions.error'),

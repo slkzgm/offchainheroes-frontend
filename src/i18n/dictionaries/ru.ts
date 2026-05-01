@@ -395,6 +395,8 @@ const ru: Messages = {
       actions: {
         heartbeat: 'Хартбит',
         claim_bait: 'Сбор приманки',
+        item_crafted: 'Крафт предмета',
+        energy_restored: 'Восстановление энергии',
         fish_sold: 'Продажа по сделке',
         fish_loot: 'Добыча рыбы',
         error: 'Ошибка',

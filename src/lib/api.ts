@@ -285,6 +285,8 @@ export async function triggerManualRun(): Promise<{ status: string }> {
 export type BotLogAction =
   | 'heartbeat'
   | 'claim_bait'
+  | 'item_crafted'
+  | 'energy_restored'
   | 'fish_sold'
   | 'fish_loot'
   | 'error'

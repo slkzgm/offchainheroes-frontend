@@ -393,6 +393,8 @@ const ko = {
       actions: {
         heartbeat: '상태 체크',
         claim_bait: '미끼 수령',
+        item_crafted: '아이템 제작',
+        energy_restored: '에너지 회복',
         fish_sold: '데일리 딜 판매',
         fish_loot: '낚시 보상',
         error: '오류',

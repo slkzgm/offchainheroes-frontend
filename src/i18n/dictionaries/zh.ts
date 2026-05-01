@@ -385,6 +385,8 @@ const zh: Messages = {
       actions: {
         heartbeat: '心跳',
         claim_bait: '领取诱饵',
+        item_crafted: '制作物品',
+        energy_restored: '恢复能量',
         fish_sold: '出售每日特卖',
         fish_loot: '钓鱼收益',
         error: '错误',
