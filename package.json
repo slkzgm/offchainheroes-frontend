@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "author": "slkzgm",
@@ -16,8 +16,8 @@
     "url": "https://github.com/slkzgm/nextera"
   },
   "dependencies": {
-    "@abstract-foundation/agw-client": "^1.9.1",
-    "@abstract-foundation/agw-react": "^1.9.1",
+    "@abstract-foundation/agw-client": "^1.12.3",
+    "@abstract-foundation/agw-react": "^1.13.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.7",
@@ -26,26 +26,25 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
-    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query": "^5.100.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.487.0",
-    "next": "15.5.15",
+    "next": "16.2.4",
     "next-themes": "^0.4.6",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
-    "viem": "~2.37.9",
-    "wagmi": "^2.17.5"
+    "viem": "~2.47.12",
+    "wagmi": "^2.19.5"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
     "@types/node": "^20.19.17",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.36.0",
-    "eslint-config-next": "15.5.15",
+    "eslint-config-next": "16.2.4",
     "eslint-config-prettier": "^9.1.2",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.5.14",
@@ -55,7 +54,14 @@
   },
   "pnpm": {
     "overrides": {
-      "postcss": "8.5.10"
+      "axios": "1.15.2",
+      "defu": "6.1.7",
+      "h3": "1.15.9",
+      "lodash": "4.18.1",
+      "picomatch": "2.3.2",
+      "postcss": "8.5.10",
+      "preact": "10.29.1",
+      "socket.io-parser": "4.2.6"
     }
   }
 }

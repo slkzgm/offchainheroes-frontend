@@ -1,7 +1,7 @@
 // path: src/components/dashboard/bot-dashboard.tsx
 'use client'
 
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSession } from '@/hooks/use-session'
@@ -158,26 +158,25 @@ export default function BotDashboard() {
   const isSessionLoading = overviewQuery.isLoading || configQuery.isLoading
   const controlsDisabled = !sessionStatus?.hasCookie || configQuery.isError
 
-  const heroGroups: LiveStateHeroGroup[] = useMemo(() => {
-    if (!state?.heroes) return []
-    return [
-      {
-        key: 'active',
-        label: t('dashboard.botDashboard.heroGroups.active', { count: state.heroes.active.length }),
-        entries: state.heroes.active,
-      },
-      {
-        key: 'ready',
-        label: t('dashboard.botDashboard.heroGroups.ready', { count: state.heroes.ready.length }),
-        entries: state.heroes.ready,
-      },
-      {
-        key: 'idle',
-        label: t('dashboard.botDashboard.heroGroups.idle', { count: state.heroes.idle.length }),
-        entries: state.heroes.idle,
-      },
-    ]
-  }, [state?.heroes, t])
+  const heroGroups: LiveStateHeroGroup[] = state?.heroes
+    ? [
+        {
+          key: 'active',
+          label: t('dashboard.botDashboard.heroGroups.active', { count: state.heroes.active.length }),
+          entries: state.heroes.active,
+        },
+        {
+          key: 'ready',
+          label: t('dashboard.botDashboard.heroGroups.ready', { count: state.heroes.ready.length }),
+          entries: state.heroes.ready,
+        },
+        {
+          key: 'idle',
+          label: t('dashboard.botDashboard.heroGroups.idle', { count: state.heroes.idle.length }),
+          entries: state.heroes.idle,
+        },
+      ]
+    : []
 
   const runtimeStats: RuntimeStat[] = [
     {

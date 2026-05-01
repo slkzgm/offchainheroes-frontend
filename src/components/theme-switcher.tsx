@@ -20,7 +20,8 @@ export default function ThemeSwitcher() {
 
   // Avoid hydration mismatch
   useEffect(() => {
-    setMounted(true)
+    const frame = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(frame)
   }, [])
 
   if (!mounted) {
