@@ -120,6 +120,11 @@ const zh: Messages = {
           gasChug: 'Gas Chug',
           gasSlam: 'Gas Slam',
         },
+        autoCraftFilet: {
+          label: '自动制作 Filet-O-Phin',
+          description:
+            '自动将 Dolphin fish 烹饪成 Filet-O-Phin。只要上方已勾选，现有 Filet-O-Phin 仍可使用。',
+        },
       },
       zone: {
         label: '钓鱼区域',

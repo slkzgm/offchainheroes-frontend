@@ -125,6 +125,11 @@ const ko = {
           gasChug: 'Gas Chug',
           gasSlam: 'Gas Slam',
         },
+        autoCraftFilet: {
+          label: 'Filet-O-Phin 자동 제작',
+          description:
+            'Dolphin 물고기를 Filet-O-Phin으로 자동 조리합니다. 위에서 선택되어 있으면 기존 Filet-O-Phin은 계속 사용할 수 있습니다.',
+        },
       },
       zone: {
         label: '낚시 구역',

@@ -126,6 +126,11 @@ const ru: Messages = {
           gasChug: 'Gas Chug',
           gasSlam: 'Gas Slam',
         },
+        autoCraftFilet: {
+          label: 'Автокрафт Filet-O-Phin',
+          description:
+            'Автоматически готовит Dolphin fish в Filet-O-Phin. Уже имеющиеся Filet-O-Phin всё равно используются, если выбраны выше.',
+        },
       },
       zone: {
         label: 'Зона рыбалки',

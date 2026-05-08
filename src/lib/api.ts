@@ -123,6 +123,7 @@ export interface UserOverviewResponse {
     autoClaimBait: boolean
     autoSellFish: boolean
     energyRestoreItemIds: EnergyRestoreItemId[]
+    autoCraftFiletOPhin: boolean
     lastSuccessAt?: string | null
     lastErrorAt?: string | null
     nextCheck?: {
@@ -158,6 +159,7 @@ export interface BotConfigurationResponse {
   autoClaimBait: boolean
   autoSellFish: boolean
   energyRestoreItemIds: EnergyRestoreItemId[]
+  autoCraftFiletOPhin: boolean
   zoneId: number | null
   effectiveZone: {
     id: number
@@ -204,6 +206,7 @@ export async function updateBotConfig(
     autoClaimBait: boolean
     autoSellFish: boolean
     energyRestoreItemIds: EnergyRestoreItemId[]
+    autoCraftFiletOPhin: boolean
     zoneId: number
   }>
 ): Promise<BotConfigurationResponse> {
