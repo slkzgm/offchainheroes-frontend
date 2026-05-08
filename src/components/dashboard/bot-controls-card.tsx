@@ -33,6 +33,7 @@ interface BotControlsCardProps {
   onToggleAutoClaim: (checked: boolean) => void
   onToggleAutoSell: (checked: boolean) => void
   onChangeEnergyRestoreItems: (itemIds: EnergyRestoreItemId[]) => void
+  onToggleAutoCraftFiletOPhin: (checked: boolean) => void
   onSelectZone: (zoneId: number) => void
   isZoneLoading: boolean
   onTriggerRun: () => void
@@ -48,6 +49,7 @@ export function BotControlsCard({
   onToggleAutoClaim,
   onToggleAutoSell,
   onChangeEnergyRestoreItems,
+  onToggleAutoCraftFiletOPhin,
   onSelectZone,
   isZoneLoading,
   onTriggerRun,
@@ -233,6 +235,22 @@ export function BotControlsCard({
                   </label>
                 )
               })}
+            </div>
+            <div className="flex items-center justify-between gap-4 rounded-md border border-input px-3 py-2">
+              <div>
+                <Label htmlFor="bot-auto-craft-filet" className="text-sm font-medium">
+                  {t('dashboard.controls.energyRestore.autoCraftFilet.label')}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t('dashboard.controls.energyRestore.autoCraftFilet.description')}
+                </p>
+              </div>
+              <Switch
+                id="bot-auto-craft-filet"
+                checked={config?.autoCraftFiletOPhin ?? true}
+                onCheckedChange={onToggleAutoCraftFiletOPhin}
+                disabled={disabled || isUpdating}
+              />
             </div>
           </div>
         </div>

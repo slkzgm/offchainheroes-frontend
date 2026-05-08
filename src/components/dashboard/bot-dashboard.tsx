@@ -95,6 +95,7 @@ export default function BotDashboard() {
         autoClaimBait: boolean
         autoSellFish: boolean
         energyRestoreItemIds: EnergyRestoreItemId[]
+        autoCraftFiletOPhin: boolean
         zoneId: number
       }>
     ) => updateBotConfig(payload),
@@ -284,6 +285,9 @@ export default function BotDashboard() {
             onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
             onChangeEnergyRestoreItems={(energyRestoreItemIds) =>
               updateConfigMutation.mutate({ energyRestoreItemIds })
+            }
+            onToggleAutoCraftFiletOPhin={(autoCraftFiletOPhin) =>
+              updateConfigMutation.mutate({ autoCraftFiletOPhin })
             }
             onSelectZone={(zoneId) => updateConfigMutation.mutate({ zoneId })}
             onTriggerRun={() => manualRunMutation.mutate()}

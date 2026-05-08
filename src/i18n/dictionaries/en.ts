@@ -123,6 +123,11 @@ const en = {
           gasChug: 'Gas Chug',
           gasSlam: 'Gas Slam',
         },
+        autoCraftFilet: {
+          label: 'Auto-craft Filet-O-Phin',
+          description:
+            'Cook Dolphin fish into Filet-O-Phin automatically. Existing Filet-O-Phin can still be used when selected above.',
+        },
       },
       zone: {
         label: 'Fishing zone',
