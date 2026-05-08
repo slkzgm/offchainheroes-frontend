@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { Providers } from '@/components/providers'
+import { CommunityBanner } from '@/components/community-links'
 import { Toaster } from '@/components/ui/sonner'
 import {
   createTranslator,
@@ -113,6 +114,7 @@ export default async function LocaleLayout({
 
   return (
     <Providers locale={locale} messages={messages}>
+      <CommunityBanner />
       {children}
       <Toaster />
     </Providers>

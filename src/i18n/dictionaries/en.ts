@@ -53,6 +53,15 @@ const en = {
       minutesAgo: '{{count}} min ago',
     },
   },
+  community: {
+    discord: {
+      title: 'Join the Discord.',
+      description:
+        'Get patch updates, bot action notices, session renewal reminders, and reconfiguration alerts.',
+      cta: 'Join Discord',
+      socialLabel: 'Open Discord community',
+    },
+  },
   dashboard: {
     page: {
       title: 'Automation dashboard',
