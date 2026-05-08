@@ -105,6 +105,16 @@ const en = {
         label: 'Auto-sell fish',
         description: 'Automatically liquidate fish based on strategy.',
       },
+      energyRestore: {
+        label: 'Energy restore items',
+        description: 'Choose which Gas items the bot may spend automatically.',
+        options: {
+          filet_only: 'Filet-O-Phin only',
+          gas_shot: 'Filet-O-Phin + Gas Shot',
+          gas_shot_chug: 'Filet-O-Phin + Gas Shot + Gas Chug',
+          all_gas: 'Filet-O-Phin + all Gas items',
+        },
+      },
       zone: {
         label: 'Fishing zone',
         description: 'Pick which fishing zone the bot should use by default.',

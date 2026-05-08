@@ -107,6 +107,16 @@ const ru: Messages = {
         label: 'Авто-продажа рыбы',
         description: 'Автоматически продавать добычу согласно стратегии.',
       },
+      energyRestore: {
+        label: 'Предметы восстановления энергии',
+        description: 'Выберите, какие Gas-предметы бот может тратить автоматически.',
+        options: {
+          filet_only: 'Только Filet-O-Phin',
+          gas_shot: 'Filet-O-Phin + Gas Shot',
+          gas_shot_chug: 'Filet-O-Phin + Gas Shot + Gas Chug',
+          all_gas: 'Filet-O-Phin + все Gas-предметы',
+        },
+      },
       zone: {
         label: 'Зона рыбалки',
         description: 'Выберите зону, которую бот будет использовать по умолчанию.',

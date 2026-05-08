@@ -26,6 +26,7 @@ import {
   type UserOverviewResponse,
   type AlertSettingsResponse,
   type TelegramLinkResponse,
+  type EnergyRestoreMode,
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { RuntimeSnapshotCard, type RuntimeStat } from '@/components/dashboard/runtime-snapshot-card'
@@ -88,8 +89,15 @@ export default function BotDashboard() {
   })
 
   const updateConfigMutation = useMutation({
-    mutationFn: (payload: Partial<{ isEnabled: boolean; autoClaimBait: boolean; autoSellFish: boolean; zoneId: number }>) =>
-      updateBotConfig(payload),
+    mutationFn: (
+      payload: Partial<{
+        isEnabled: boolean
+        autoClaimBait: boolean
+        autoSellFish: boolean
+        energyRestoreMode: EnergyRestoreMode
+        zoneId: number
+      }>
+    ) => updateBotConfig(payload),
     onSuccess: (data) => {
       queryClient.setQueryData(['bot-config', session?.userId], data)
       queryClient.invalidateQueries({ queryKey: ['user-overview', session?.userId] }).catch(() => {})
@@ -262,6 +270,7 @@ export default function BotDashboard() {
             onToggleEnabled={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
             onToggleAutoClaim={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
             onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
+            onSelectEnergyRestoreMode={(energyRestoreMode) => updateConfigMutation.mutate({ energyRestoreMode })}
             onSelectZone={(zoneId) => updateConfigMutation.mutate({ zoneId })}
             onTriggerRun={() => manualRunMutation.mutate()}
           />
