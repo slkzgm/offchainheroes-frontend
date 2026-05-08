@@ -6,17 +6,22 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import type { BotConfigurationResponse, EnergyRestoreMode, FishingZone } from '@/lib/api'
+import type { BotConfigurationResponse, EnergyRestoreItemId, FishingZone } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { Loader2, RotateCcw } from 'lucide-react'
 import { useTranslate } from '@/i18n/client'
 
-const ENERGY_RESTORE_MODES: readonly EnergyRestoreMode[] = [
-  'filet_only',
-  'gas_shot',
-  'gas_shot_chug',
-  'all_gas',
-]
+const ENERGY_RESTORE_ITEMS = [
+  { id: 69, labelKey: 'filetOPhin' },
+  { id: 25, labelKey: 'gasShot' },
+  { id: 26, labelKey: 'gasChug' },
+  { id: 27, labelKey: 'gasSlam' },
+] as const satisfies readonly {
+  id: EnergyRestoreItemId
+  labelKey: 'filetOPhin' | 'gasShot' | 'gasChug' | 'gasSlam'
+}[]
+
+const DEFAULT_ENERGY_RESTORE_ITEM_IDS = ENERGY_RESTORE_ITEMS.map((item) => item.id)
 
 interface BotControlsCardProps {
   config?: BotConfigurationResponse
@@ -27,7 +32,7 @@ interface BotControlsCardProps {
   onToggleEnabled: (checked: boolean) => void
   onToggleAutoClaim: (checked: boolean) => void
   onToggleAutoSell: (checked: boolean) => void
-  onSelectEnergyRestoreMode: (mode: EnergyRestoreMode) => void
+  onChangeEnergyRestoreItems: (itemIds: EnergyRestoreItemId[]) => void
   onSelectZone: (zoneId: number) => void
   isZoneLoading: boolean
   onTriggerRun: () => void
@@ -42,7 +47,7 @@ export function BotControlsCard({
   onToggleEnabled,
   onToggleAutoClaim,
   onToggleAutoSell,
-  onSelectEnergyRestoreMode,
+  onChangeEnergyRestoreItems,
   onSelectZone,
   isZoneLoading,
   onTriggerRun,
@@ -56,10 +61,30 @@ export function BotControlsCard({
     selectedZoneId !== null && zones.some((zone) => zone.zoneId === selectedZoneId)
   const zoneFallbackNotice =
     effectiveZone && zoneResolution?.status === 'fallback_disabled'
-      ? t('dashboard.controls.zone.fallbackDisabled', { name: effectiveZone.name, energy: effectiveZone.energy })
+      ? t('dashboard.controls.zone.fallbackDisabled', {
+          name: effectiveZone.name,
+          energy: effectiveZone.energy,
+        })
       : effectiveZone && zoneResolution?.status === 'fallback_missing'
-        ? t('dashboard.controls.zone.fallbackMissing', { name: effectiveZone.name, energy: effectiveZone.energy })
+        ? t('dashboard.controls.zone.fallbackMissing', {
+            name: effectiveZone.name,
+            energy: effectiveZone.energy,
+          })
         : null
+  const selectedEnergyRestoreItemIds =
+    config?.energyRestoreItemIds ?? DEFAULT_ENERGY_RESTORE_ITEM_IDS
+
+  const handleEnergyRestoreItemChange = (itemId: EnergyRestoreItemId, checked: boolean) => {
+    const selected = new Set(selectedEnergyRestoreItemIds)
+    if (checked) {
+      selected.add(itemId)
+    } else {
+      selected.delete(itemId)
+    }
+    onChangeEnergyRestoreItems(
+      ENERGY_RESTORE_ITEMS.map((item) => item.id).filter((id) => selected.has(id))
+    )
+  }
 
   return (
     <Card>
@@ -72,7 +97,9 @@ export function BotControlsCard({
             <Label htmlFor="bot-enabled" className="text-sm font-medium">
               {t('dashboard.controls.automation.label')}
             </Label>
-            <p className="text-xs text-muted-foreground">{t('dashboard.controls.automation.description')}</p>
+            <p className="text-xs text-muted-foreground">
+              {t('dashboard.controls.automation.description')}
+            </p>
           </div>
           <Switch
             id="bot-enabled"
@@ -137,9 +164,7 @@ export function BotControlsCard({
               </p>
             ) : null}
             {zoneFallbackNotice ? (
-              <p className="text-xs text-amber-600">
-                {zoneFallbackNotice}
-              </p>
+              <p className="text-xs text-amber-600">{zoneFallbackNotice}</p>
             ) : null}
           </div>
           <Separator />
@@ -148,7 +173,9 @@ export function BotControlsCard({
               <Label htmlFor="bot-auto-claim" className="text-sm font-medium">
                 {t('dashboard.controls.autoClaim.label')}
               </Label>
-              <p className="text-xs text-muted-foreground">{t('dashboard.controls.autoClaim.description')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('dashboard.controls.autoClaim.description')}
+              </p>
             </div>
             <Switch
               id="bot-auto-claim"
@@ -162,7 +189,9 @@ export function BotControlsCard({
               <Label htmlFor="bot-auto-sell" className="text-sm font-medium">
                 {t('dashboard.controls.autoSell.label')}
               </Label>
-              <p className="text-xs text-muted-foreground">{t('dashboard.controls.autoSell.description')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('dashboard.controls.autoSell.description')}
+              </p>
             </div>
             <Switch
               id="bot-auto-sell"
@@ -171,28 +200,40 @@ export function BotControlsCard({
               disabled={disabled || isUpdating}
             />
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="space-y-3">
             <div>
-              <Label htmlFor="bot-energy-restore-mode" className="text-sm font-medium">
+              <Label className="text-sm font-medium">
                 {t('dashboard.controls.energyRestore.label')}
               </Label>
               <p className="text-xs text-muted-foreground">
                 {t('dashboard.controls.energyRestore.description')}
               </p>
             </div>
-            <select
-              id="bot-energy-restore-mode"
-              className="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
-              value={config?.energyRestoreMode ?? 'all_gas'}
-              onChange={(event) => onSelectEnergyRestoreMode(event.target.value as EnergyRestoreMode)}
-              disabled={disabled || isUpdating}
-            >
-              {ENERGY_RESTORE_MODES.map((mode) => (
-                <option key={mode} value={mode}>
-                  {t(`dashboard.controls.energyRestore.options.${mode}`)}
-                </option>
-              ))}
-            </select>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {ENERGY_RESTORE_ITEMS.map((item) => {
+                const itemId = item.id
+                const inputId = `bot-energy-restore-item-${itemId}`
+                return (
+                  <label
+                    key={itemId}
+                    htmlFor={inputId}
+                    className="flex min-h-9 items-center gap-2 rounded-md border border-input px-3 py-2 text-sm"
+                  >
+                    <input
+                      id={inputId}
+                      type="checkbox"
+                      className="h-4 w-4 accent-primary"
+                      checked={selectedEnergyRestoreItemIds.includes(itemId)}
+                      onChange={(event) =>
+                        handleEnergyRestoreItemChange(itemId, event.target.checked)
+                      }
+                      disabled={disabled || isUpdating}
+                    />
+                    <span>{t(`dashboard.controls.energyRestore.items.${item.labelKey}`)}</span>
+                  </label>
+                )
+              })}
+            </div>
           </div>
         </div>
       </CardContent>
@@ -212,7 +253,11 @@ export function BotControlsCard({
           onClick={onTriggerRun}
           className="gap-2"
         >
-          {isManualRunPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+          {isManualRunPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RotateCcw className="h-4 w-4" />
+          )}
           {t('dashboard.controls.triggerRun')}
         </Button>
       </CardFooter>

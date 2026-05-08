@@ -107,12 +107,12 @@ const en = {
       },
       energyRestore: {
         label: 'Energy restore items',
-        description: 'Choose which Gas items the bot may spend automatically.',
-        options: {
-          filet_only: 'Filet-O-Phin only',
-          gas_shot: 'Filet-O-Phin + Gas Shot',
-          gas_shot_chug: 'Filet-O-Phin + Gas Shot + Gas Chug',
-          all_gas: 'Filet-O-Phin + all Gas items',
+        description: 'Select each restore item the bot may use automatically.',
+        items: {
+          filetOPhin: 'Filet-O-Phin',
+          gasShot: 'Gas Shot',
+          gasChug: 'Gas Chug',
+          gasSlam: 'Gas Slam',
         },
       },
       zone: {

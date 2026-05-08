@@ -109,12 +109,13 @@ const ru: Messages = {
       },
       energyRestore: {
         label: 'Предметы восстановления энергии',
-        description: 'Выберите, какие Gas-предметы бот может тратить автоматически.',
-        options: {
-          filet_only: 'Только Filet-O-Phin',
-          gas_shot: 'Filet-O-Phin + Gas Shot',
-          gas_shot_chug: 'Filet-O-Phin + Gas Shot + Gas Chug',
-          all_gas: 'Filet-O-Phin + все Gas-предметы',
+        description:
+          'Выберите каждый предмет восстановления, который бот может использовать автоматически.',
+        items: {
+          filetOPhin: 'Filet-O-Phin',
+          gasShot: 'Gas Shot',
+          gasChug: 'Gas Chug',
+          gasSlam: 'Gas Slam',
         },
       },
       zone: {
