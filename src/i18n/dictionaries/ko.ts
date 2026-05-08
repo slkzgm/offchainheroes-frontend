@@ -107,6 +107,16 @@ const ko = {
         label: '물고기 자동 판매',
         description: '전략에 따라 어획물을 자동으로 매도합니다.',
       },
+      energyRestore: {
+        label: '에너지 회복 아이템',
+        description: '봇이 자동으로 사용할 수 있는 Gas 아이템을 선택합니다.',
+        options: {
+          filet_only: 'Filet-O-Phin만',
+          gas_shot: 'Filet-O-Phin + Gas Shot',
+          gas_shot_chug: 'Filet-O-Phin + Gas Shot + Gas Chug',
+          all_gas: 'Filet-O-Phin + 모든 Gas 아이템',
+        },
+      },
       zone: {
         label: '낚시 구역',
         description: '봇이 기본적으로 사용할 낚시 구역을 선택하세요.',

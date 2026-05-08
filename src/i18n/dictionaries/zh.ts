@@ -103,6 +103,16 @@ const zh: Messages = {
         label: '自动出售鱼',
         description: '按照策略自动变现鱼类收益。',
       },
+      energyRestore: {
+        label: '能量恢复物品',
+        description: '选择机器人可自动消耗的 Gas 物品。',
+        options: {
+          filet_only: '仅 Filet-O-Phin',
+          gas_shot: 'Filet-O-Phin + Gas Shot',
+          gas_shot_chug: 'Filet-O-Phin + Gas Shot + Gas Chug',
+          all_gas: 'Filet-O-Phin + 全部 Gas 物品',
+        },
+      },
       zone: {
         label: '钓鱼区域',
         description: '选择机器人默认使用的钓鱼区域。',

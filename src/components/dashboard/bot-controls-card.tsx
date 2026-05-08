@@ -6,10 +6,17 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import type { BotConfigurationResponse, FishingZone } from '@/lib/api'
+import type { BotConfigurationResponse, EnergyRestoreMode, FishingZone } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { Loader2, RotateCcw } from 'lucide-react'
 import { useTranslate } from '@/i18n/client'
+
+const ENERGY_RESTORE_MODES: readonly EnergyRestoreMode[] = [
+  'filet_only',
+  'gas_shot',
+  'gas_shot_chug',
+  'all_gas',
+]
 
 interface BotControlsCardProps {
   config?: BotConfigurationResponse
@@ -20,6 +27,7 @@ interface BotControlsCardProps {
   onToggleEnabled: (checked: boolean) => void
   onToggleAutoClaim: (checked: boolean) => void
   onToggleAutoSell: (checked: boolean) => void
+  onSelectEnergyRestoreMode: (mode: EnergyRestoreMode) => void
   onSelectZone: (zoneId: number) => void
   isZoneLoading: boolean
   onTriggerRun: () => void
@@ -34,6 +42,7 @@ export function BotControlsCard({
   onToggleEnabled,
   onToggleAutoClaim,
   onToggleAutoSell,
+  onSelectEnergyRestoreMode,
   onSelectZone,
   isZoneLoading,
   onTriggerRun,
@@ -161,6 +170,29 @@ export function BotControlsCard({
               onCheckedChange={onToggleAutoSell}
               disabled={disabled || isUpdating}
             />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <Label htmlFor="bot-energy-restore-mode" className="text-sm font-medium">
+                {t('dashboard.controls.energyRestore.label')}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {t('dashboard.controls.energyRestore.description')}
+              </p>
+            </div>
+            <select
+              id="bot-energy-restore-mode"
+              className="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+              value={config?.energyRestoreMode ?? 'all_gas'}
+              onChange={(event) => onSelectEnergyRestoreMode(event.target.value as EnergyRestoreMode)}
+              disabled={disabled || isUpdating}
+            >
+              {ENERGY_RESTORE_MODES.map((mode) => (
+                <option key={mode} value={mode}>
+                  {t(`dashboard.controls.energyRestore.options.${mode}`)}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </CardContent>
