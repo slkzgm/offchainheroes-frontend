@@ -55,6 +55,15 @@ const ko = {
       minutesAgo: '{{count}}분 전',
     },
   },
+  community: {
+    discord: {
+      title: 'Discord에 참여하세요.',
+      description:
+        '패치 업데이트, 봇 작업 안내, 세션 갱신 알림, 재설정 공지를 받아보세요.',
+      cta: 'Discord 참여',
+      socialLabel: 'Discord 커뮤니티 열기',
+    },
+  },
   dashboard: {
     page: {
       title: '자동화 대시보드',

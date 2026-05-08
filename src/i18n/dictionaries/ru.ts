@@ -55,6 +55,15 @@ const ru: Messages = {
       minutesAgo: '{{count}} мин назад',
     },
   },
+  community: {
+    discord: {
+      title: 'Присоединяйтесь к Discord.',
+      description:
+        'Получайте обновления патчей, уведомления о действиях бота, напоминания о сессии и алерты о настройках.',
+      cta: 'Открыть Discord',
+      socialLabel: 'Открыть Discord-сообщество',
+    },
+  },
   dashboard: {
     page: {
       title: 'Панель автоматизации',

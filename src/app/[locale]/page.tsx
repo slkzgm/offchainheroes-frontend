@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import ThemeSwitcher from '@/components/theme-switcher'
 import LanguageSwitcher from '@/components/language-switcher'
 import LandingAuthPanel from '@/components/landing-auth-panel'
+import { DiscordSocialLink } from '@/components/community-links'
 import { createTranslator, defaultLocale, getMessages, isLocale, locales, type Locale } from '@/i18n'
 
 type LocaleSegment = { locale?: string | string[] }
@@ -37,6 +38,7 @@ export default async function Home({ params }: { params?: LocaleParams }) {
       <header className="flex items-center justify-between">
         <div className="text-2xl font-semibold tracking-tight">{t('common.appName')}</div>
         <div className="flex items-center gap-2">
+          <DiscordSocialLink />
           <Suspense fallback={null}>
             <LanguageSwitcher />
           </Suspense>

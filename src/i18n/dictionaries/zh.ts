@@ -52,6 +52,14 @@ const zh: Messages = {
       minutesAgo: '{{count}} 分钟前',
     },
   },
+  community: {
+    discord: {
+      title: '加入 Discord。',
+      description: '获取补丁更新、机器人操作通知、会话续期提醒和重新配置提示。',
+      cta: '加入 Discord',
+      socialLabel: '打开 Discord 社区',
+    },
+  },
   dashboard: {
     page: {
       title: '自动化控制台',

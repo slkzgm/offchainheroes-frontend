@@ -8,6 +8,7 @@ import ThemeSwitcher from '@/components/theme-switcher'
 import LanguageSwitcher from '@/components/language-switcher'
 import BotDashboard from '@/components/dashboard/bot-dashboard'
 import { BotDashboardSkeleton } from '@/components/dashboard/bot-dashboard-skeleton'
+import { DiscordSocialLink } from '@/components/community-links'
 import { useSession } from '@/hooks/use-session'
 import { logout } from '@/lib/api'
 import { getUserOverview, type UserOverviewResponse } from '@/lib/api'
@@ -81,6 +82,7 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <DiscordSocialLink />
           <LanguageSwitcher />
           <ThemeSwitcher />
           <Button variant="outline" size="sm" onClick={() => void handleLogout()} disabled={overviewQuery.isLoading}>
