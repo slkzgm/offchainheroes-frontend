@@ -113,7 +113,7 @@ export interface BotSessionStatus {
   renewAheadSeconds: number
 }
 
-export type EnergyRestoreMode = 'filet_only' | 'gas_shot' | 'gas_shot_chug' | 'all_gas'
+export type EnergyRestoreItemId = 69 | 25 | 26 | 27
 
 export interface UserOverviewResponse {
   user: { userId: string; address: string }
@@ -122,7 +122,7 @@ export interface UserOverviewResponse {
     isEnabled: boolean
     autoClaimBait: boolean
     autoSellFish: boolean
-    energyRestoreMode: EnergyRestoreMode
+    energyRestoreItemIds: EnergyRestoreItemId[]
     lastSuccessAt?: string | null
     lastErrorAt?: string | null
     nextCheck?: {
@@ -157,7 +157,7 @@ export interface BotConfigurationResponse {
   isEnabled: boolean
   autoClaimBait: boolean
   autoSellFish: boolean
-  energyRestoreMode: EnergyRestoreMode
+  energyRestoreItemIds: EnergyRestoreItemId[]
   zoneId: number | null
   effectiveZone: {
     id: number
@@ -203,7 +203,7 @@ export async function updateBotConfig(
     isEnabled: boolean
     autoClaimBait: boolean
     autoSellFish: boolean
-    energyRestoreMode: EnergyRestoreMode
+    energyRestoreItemIds: EnergyRestoreItemId[]
     zoneId: number
   }>
 ): Promise<BotConfigurationResponse> {

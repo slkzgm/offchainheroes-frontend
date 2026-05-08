@@ -26,7 +26,7 @@ import {
   type UserOverviewResponse,
   type AlertSettingsResponse,
   type TelegramLinkResponse,
-  type EnergyRestoreMode,
+  type EnergyRestoreItemId,
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { RuntimeSnapshotCard, type RuntimeStat } from '@/components/dashboard/runtime-snapshot-card'
@@ -94,13 +94,15 @@ export default function BotDashboard() {
         isEnabled: boolean
         autoClaimBait: boolean
         autoSellFish: boolean
-        energyRestoreMode: EnergyRestoreMode
+        energyRestoreItemIds: EnergyRestoreItemId[]
         zoneId: number
       }>
     ) => updateBotConfig(payload),
     onSuccess: (data) => {
       queryClient.setQueryData(['bot-config', session?.userId], data)
-      queryClient.invalidateQueries({ queryKey: ['user-overview', session?.userId] }).catch(() => {})
+      queryClient
+        .invalidateQueries({ queryKey: ['user-overview', session?.userId] })
+        .catch(() => {})
       toast.success(t('dashboard.botDashboard.toasts.configUpdated'))
     },
     onError: (error: unknown) => {
@@ -170,7 +172,9 @@ export default function BotDashboard() {
     ? [
         {
           key: 'active',
-          label: t('dashboard.botDashboard.heroGroups.active', { count: state.heroes.active.length }),
+          label: t('dashboard.botDashboard.heroGroups.active', {
+            count: state.heroes.active.length,
+          }),
           entries: state.heroes.active,
         },
         {
@@ -190,19 +194,25 @@ export default function BotDashboard() {
     {
       key: 'next-run',
       label: t('dashboard.botDashboard.runtimeStats.nextRun'),
-      value: config?.nextCheck?.nextCheckAt ? formatRelative(config.nextCheck.nextCheckAt) : t('common.placeholders.notAvailable'),
+      value: config?.nextCheck?.nextCheckAt
+        ? formatRelative(config.nextCheck.nextCheckAt)
+        : t('common.placeholders.notAvailable'),
       hint: config?.nextCheck?.nextCheckAt ? formatDate(config.nextCheck.nextCheckAt) : undefined,
     },
     {
       key: 'last-success',
       label: t('dashboard.botDashboard.runtimeStats.lastSuccess'),
-      value: config?.lastSuccessAt ? formatRelative(config.lastSuccessAt) : t('common.placeholders.notAvailable'),
+      value: config?.lastSuccessAt
+        ? formatRelative(config.lastSuccessAt)
+        : t('common.placeholders.notAvailable'),
       hint: config?.lastSuccessAt ? formatDate(config.lastSuccessAt) : undefined,
     },
     {
       key: 'last-error',
       label: t('dashboard.botDashboard.runtimeStats.lastError'),
-      value: config?.lastErrorAt ? formatRelative(config.lastErrorAt) : t('common.placeholders.notAvailable'),
+      value: config?.lastErrorAt
+        ? formatRelative(config.lastErrorAt)
+        : t('common.placeholders.notAvailable'),
       hint: config?.lastErrorAt ? formatDate(config.lastErrorAt) : undefined,
     },
     {
@@ -243,7 +253,9 @@ export default function BotDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>{t('dashboard.botDashboard.unauthenticated.title')}</CardTitle>
-          <CardDescription>{t('dashboard.botDashboard.unauthenticated.description')}</CardDescription>
+          <CardDescription>
+            {t('dashboard.botDashboard.unauthenticated.description')}
+          </CardDescription>
         </CardHeader>
       </Card>
     )
@@ -270,14 +282,18 @@ export default function BotDashboard() {
             onToggleEnabled={(checked) => updateConfigMutation.mutate({ isEnabled: checked })}
             onToggleAutoClaim={(checked) => updateConfigMutation.mutate({ autoClaimBait: checked })}
             onToggleAutoSell={(checked) => updateConfigMutation.mutate({ autoSellFish: checked })}
-            onSelectEnergyRestoreMode={(energyRestoreMode) => updateConfigMutation.mutate({ energyRestoreMode })}
+            onChangeEnergyRestoreItems={(energyRestoreItemIds) =>
+              updateConfigMutation.mutate({ energyRestoreItemIds })
+            }
             onSelectZone={(zoneId) => updateConfigMutation.mutate({ zoneId })}
             onTriggerRun={() => manualRunMutation.mutate()}
           />
           <AlertSettingsCard
             settings={alertSettings}
             isLoading={alertSettingsQuery.isLoading}
-            errorMessage={alertSettingsQuery.isError ? getErrorMessage(alertSettingsQuery.error) : null}
+            errorMessage={
+              alertSettingsQuery.isError ? getErrorMessage(alertSettingsQuery.error) : null
+            }
             isGeneratingLink={generateAlertLinkMutation.isPending}
             isUpdatingPreferences={updateAlertPreferencesMutation.isPending}
             isUpdatingLocale={updateAlertLocaleMutation.isPending}
@@ -287,7 +303,9 @@ export default function BotDashboard() {
             onDisable={async () => {
               await disableAlertsMutation.mutateAsync()
             }}
-            onUpdatePreferences={(preferences) => updateAlertPreferencesMutation.mutateAsync(preferences)}
+            onUpdatePreferences={(preferences) =>
+              updateAlertPreferencesMutation.mutateAsync(preferences)
+            }
             onUpdateLocale={(locale) => updateAlertLocaleMutation.mutateAsync(locale)}
           />
         </div>
