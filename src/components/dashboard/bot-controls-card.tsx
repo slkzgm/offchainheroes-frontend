@@ -21,7 +21,7 @@ const ENERGY_RESTORE_ITEMS = [
   labelKey: 'filetOPhin' | 'gasShot' | 'gasChug' | 'gasSlam'
 }[]
 
-const DEFAULT_ENERGY_RESTORE_ITEM_IDS = ENERGY_RESTORE_ITEMS.map((item) => item.id)
+const DEFAULT_ENERGY_RESTORE_ITEM_IDS: readonly EnergyRestoreItemId[] = []
 
 interface BotControlsCardProps {
   config?: BotConfigurationResponse
@@ -247,7 +247,7 @@ export function BotControlsCard({
               </div>
               <Switch
                 id="bot-auto-craft-filet"
-                checked={config?.autoCraftFiletOPhin ?? true}
+                checked={config?.autoCraftFiletOPhin ?? false}
                 onCheckedChange={onToggleAutoCraftFiletOPhin}
                 disabled={disabled || isUpdating}
               />
