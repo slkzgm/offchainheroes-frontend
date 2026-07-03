@@ -43,6 +43,11 @@ export interface FishInventoryTotals {
   value: number
 }
 
+export interface FishPricesSnapshot {
+  dailyDeals?: Record<string, number | undefined> | null
+  regular?: Record<string, number | undefined> | null
+}
+
 export interface DailyDealRow {
   definition: FishDefinition
   sold: number
@@ -256,6 +261,7 @@ export function buildFishSnapshot(
   inventory?: Record<string, number | undefined> | null,
   dailyDeals?: Record<string, number | undefined> | null,
   soldToday?: Record<string, number | undefined> | null,
+  prices?: FishPricesSnapshot | null,
 ): {
   inventoryRows: FishInventoryRow[]
   inventoryTotals: FishInventoryTotals
@@ -265,6 +271,7 @@ export function buildFishSnapshot(
   const safeInventory = inventory ?? {}
   const safeDeals = dailyDeals ?? {}
   const safeSold = soldToday ?? {}
+  const safeRegularPrices = prices?.regular ?? {}
 
   const rowsMap = new Map<number, FishInventoryRow>()
 
@@ -275,11 +282,22 @@ export function buildFishSnapshot(
 
   const getDefinition = (id: number): FishDefinition => lookup.get(id) ?? createFallbackFishDefinition(id)
 
+  const getUnitValue = (id: number, definition: FishDefinition): number => {
+    const regularPrice = safeRegularPrices[String(id)]
+    if (typeof regularPrice === 'number' && Number.isFinite(regularPrice)) {
+      return Math.max(0, regularPrice)
+    }
+
+    return typeof definition.unitValue === 'number' && Number.isFinite(definition.unitValue)
+      ? Math.max(0, definition.unitValue)
+      : 0
+  }
+
   const ensureRow = (id: number): FishInventoryRow => {
     const existing = rowsMap.get(id)
     if (existing) return existing
     const definition = getDefinition(id)
-    const unitValue = typeof definition.unitValue === 'number' ? definition.unitValue : 0
+    const unitValue = getUnitValue(id, definition)
     const row: FishInventoryRow = {
       definition,
       quantity: 0,
@@ -295,6 +313,7 @@ export function buildFishSnapshot(
       if (typeof value !== 'number' || !Number.isFinite(value)) continue
       const id = Number.parseInt(key, 10)
       if (!Number.isFinite(id)) continue
+      if (value <= 0 && !lookup.has(id)) continue
       const row = ensureRow(id)
       row.quantity = Math.max(0, value)
       row.totalValue = row.quantity * row.unitValue

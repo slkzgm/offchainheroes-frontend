@@ -422,6 +422,10 @@ export interface BotStateResponse {
     regular?: Record<string, number>
     dailyDeals?: Record<string, number>
     dealsSoldToday?: Record<string, number>
+    prices?: {
+      dailyDeals?: Record<string, number>
+      regular?: Record<string, number>
+    } | null
   } | null
   worldsEve?: {
     worldKeysBalance?: number

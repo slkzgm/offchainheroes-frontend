@@ -701,12 +701,14 @@ export function LiveStateCard({ state, heroGroups, errorMessage, onRefresh }: Li
         fishDefinitionsQuery.data ?? [],
         state?.fish?.regular ?? null,
         state?.fish?.dailyDeals ?? null,
-        state?.fish?.dealsSoldToday ?? null
+        state?.fish?.dealsSoldToday ?? null,
+        state?.fish?.prices ?? null
       ),
     [
       fishDefinitionsQuery.data,
       state?.fish?.dailyDeals,
       state?.fish?.dealsSoldToday,
+      state?.fish?.prices,
       state?.fish?.regular,
     ]
   )
