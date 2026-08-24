@@ -268,6 +268,7 @@ export default function BotDashboard() {
         <BotSessionCard
           status={sessionStatus}
           config={config}
+          expectedWalletAddress={session?.address}
           isLoading={isSessionLoading}
           onSessionUpdated={handleSessionUpdated}
         />

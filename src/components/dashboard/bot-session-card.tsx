@@ -2,32 +2,59 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import { useAccount, useWalletClient } from 'wagmi'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { BotConfigurationResponse, BotSessionStatus } from '@/lib/api'
 import { prepareBotSession, verifyBotSession } from '@/lib/api'
 import { formatDate, formatRelative, getErrorMessage } from '@/lib/format'
 import { Loader2, Plug, RefreshCcw } from 'lucide-react'
 import { useTranslate } from '@/i18n/client'
+import { useAbstractWallet } from '@/hooks/use-abstract-wallet'
 
 interface BotSessionCardProps {
   status?: BotSessionStatus
   config?: BotConfigurationResponse
+  expectedWalletAddress?: string
   isLoading: boolean
   onSessionUpdated?: () => Promise<unknown> | void
 }
 
-export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: BotSessionCardProps) {
-  const { status: walletStatus, address } = useAccount()
-  const { data: walletClient } = useWalletClient()
+export function BotSessionCard({
+  status,
+  config,
+  expectedWalletAddress,
+  isLoading,
+  onSessionUpdated,
+}: BotSessionCardProps) {
+  const {
+    address,
+    walletClient,
+    isAvailable: walletAvailable,
+    isChecking: walletChecking,
+    isConnected,
+    isConnecting,
+    isExpired,
+    connectWallet,
+    revalidate: revalidateWallet,
+  } = useAbstractWallet()
   const [isProcessing, setIsProcessing] = useState(false)
   const t = useTranslate()
 
-  const walletConnected = walletStatus === 'connected' && Boolean(address)
+  const walletMatchesSession =
+    !expectedWalletAddress ||
+    !address ||
+    address.toLowerCase() === expectedWalletAddress.toLowerCase()
+  const walletReady = walletAvailable && walletMatchesSession
   const hasSessionCookie = status?.hasCookie ?? false
   const expiresAt = status?.expiresAt
 
@@ -71,7 +98,7 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
   }, [status, t])
 
   const handleLinkSession = useCallback(async () => {
-    if (!walletConnected || !walletClient) {
+    if (!(await revalidateWallet()) || !walletClient || !walletMatchesSession) {
       toast.error(t('dashboard.session.errors.connectWallet'))
       return
     }
@@ -85,17 +112,61 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
       }
       const signature = await walletClient.signMessage({ account, message: prepared.message })
       await verifyBotSession({ message: prepared.message, signature })
-      toast.success(hasSessionCookie ? t('dashboard.session.success.renewed') : t('dashboard.session.success.linked'))
+      toast.success(
+        hasSessionCookie
+          ? t('dashboard.session.success.renewed')
+          : t('dashboard.session.success.linked')
+      )
       await onSessionUpdated?.()
+    } catch (error) {
+      await revalidateWallet()
+      toast.error(getErrorMessage(error))
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [
+    address,
+    hasSessionCookie,
+    onSessionUpdated,
+    revalidateWallet,
+    t,
+    walletClient,
+    walletMatchesSession,
+  ])
+
+  const handleWalletConnection = useCallback(async () => {
+    try {
+      setIsProcessing(true)
+      await connectWallet({ force: isConnected && !walletMatchesSession })
+      toast.success(t('common.feedback.walletConnected'))
     } catch (error) {
       toast.error(getErrorMessage(error))
     } finally {
       setIsProcessing(false)
     }
-  }, [address, hasSessionCookie, onSessionUpdated, t, walletClient, walletConnected])
+  }, [connectWallet, isConnected, t, walletMatchesSession])
 
-  const actionLabel = hasSessionCookie ? t('dashboard.session.actions.renew') : t('dashboard.session.actions.link')
-  const actionIcon = hasSessionCookie ? <RefreshCcw className="h-4 w-4" /> : <Plug className="h-4 w-4" />
+  const sessionActionLabel = hasSessionCookie
+    ? t('dashboard.session.actions.renew')
+    : t('dashboard.session.actions.link')
+  const actionLabel = walletReady
+    ? sessionActionLabel
+    : isExpired
+      ? t('dashboard.session.actions.reconnectWallet')
+      : t('common.actions.connectWallet')
+  const actionIcon =
+    walletReady && hasSessionCookie ? (
+      <RefreshCcw className="h-4 w-4" />
+    ) : (
+      <Plug className="h-4 w-4" />
+    )
+  const walletHint = isExpired
+    ? t('dashboard.session.hints.walletExpired')
+    : !walletMatchesSession
+      ? t('dashboard.session.hints.wrongWallet')
+      : walletReady
+        ? t('dashboard.session.hints.signature')
+        : t('dashboard.session.hints.connectWallet')
 
   return (
     <Card>
@@ -138,15 +209,17 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
       <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button
           className="w-full gap-2 sm:w-auto"
-          onClick={() => void handleLinkSession()}
-          disabled={isProcessing || !walletConnected || isLoading}
+          onClick={() => void (walletReady ? handleLinkSession() : handleWalletConnection())}
+          disabled={isProcessing || isConnecting || walletChecking || isLoading}
         >
-          {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : actionIcon}
+          {isProcessing || isConnecting || walletChecking ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            actionIcon
+          )}
           {actionLabel}
         </Button>
-        <span className="text-xs text-muted-foreground sm:text-right">
-          {walletConnected ? t('dashboard.session.hints.signature') : t('dashboard.session.hints.connectWallet')}
-        </span>
+        <span className="text-xs text-muted-foreground sm:text-right">{walletHint}</span>
       </CardFooter>
     </Card>
   )
@@ -155,7 +228,9 @@ export function BotSessionCard({ status, config, isLoading, onSessionUpdated }: 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
       <span className="text-right font-medium text-foreground">{value}</span>
     </div>
   )
