@@ -380,6 +380,7 @@ const ko = {
       actions: {
         link: '세션 연결',
         renew: '세션 갱신',
+        reconnectWallet: '지갑 다시 연결',
       },
       hints: {
         notLinked: 'Onchain Heroes 세션 쿠키를 연결해 자동화를 활성화하세요.',
@@ -388,6 +389,8 @@ const ko = {
         active: '세션이 활성 상태입니다. 보안을 위해 언제든지 갱신할 수 있습니다.',
         signature: '서명에는 연결된 지갑이 사용됩니다.',
         connectWallet: '세션 작업을 사용하려면 지갑을 연결하세요.',
+        walletExpired: '지갑 연결이 만료되었습니다. 세션을 갱신하려면 다시 연결하세요.',
+        wrongWallet: '세션을 갱신하기 전에 로그인에 사용한 지갑을 다시 연결하세요.',
       },
       notScheduled: '예약되지 않음',
       success: {

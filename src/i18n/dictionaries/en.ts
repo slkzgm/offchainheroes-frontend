@@ -380,6 +380,7 @@ const en = {
       actions: {
         link: 'Link session',
         renew: 'Renew session',
+        reconnectWallet: 'Reconnect wallet',
       },
       hints: {
         notLinked: 'Link your Onchain Heroes session cookie to enable automation runs.',
@@ -388,6 +389,8 @@ const en = {
         active: 'Session active. Renew anytime to rotate credentials proactively.',
         signature: 'Signature uses the connected wallet.',
         connectWallet: 'Connect wallet to enable session actions.',
+        walletExpired: 'Your wallet connection expired. Reconnect it to renew the session.',
+        wrongWallet: 'Reconnect the wallet used to sign in before renewing the session.',
       },
       notScheduled: 'Not scheduled',
       success: {

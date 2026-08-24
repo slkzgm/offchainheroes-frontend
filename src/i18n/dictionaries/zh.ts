@@ -371,6 +371,7 @@ const zh: Messages = {
       actions: {
         link: '连接会话',
         renew: '更新会话',
+        reconnectWallet: '重新连接钱包',
       },
       hints: {
         notLinked: '连接 Onchain Heroes 会话 Cookie 以启用自动化。',
@@ -379,6 +380,8 @@ const zh: Messages = {
         active: '会话已激活，可随时主动更新以轮换凭据。',
         signature: '签名会使用已连接的钱包。',
         connectWallet: '连接钱包以执行会话操作。',
+        walletExpired: '钱包连接已过期。请重新连接后再更新会话。',
+        wrongWallet: '请重新连接登录时使用的钱包，然后再更新会话。',
       },
       notScheduled: '暂无计划',
       success: {
