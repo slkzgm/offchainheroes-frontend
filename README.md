@@ -1,5 +1,38 @@
 # Nextera
 
+## Offchain Heroes wallet support
+
+The bot dashboard accepts Abstract Global Wallet and EOA wallets on Abstract
+mainnet (2741). RainbowKit exposes AGW, Rabby and injected browser wallets;
+WalletConnect and MetaMask mobile are enabled when `NEXT_PUBLIC_REOWN_PROJECT_ID`
+is configured. The integration follows the
+[official AGW/RainbowKit setup](https://docs.abs.xyz/abstract-global-wallet/agw-react/integrating-with-rainbowkit).
+
+Copy `.env.example` to `.env.local`, configure the API URL and your public Reown
+project ID, then run `pm ci` and `pm dev --port 3001`. Set the same project ID in
+the deployment's build environment and allow the app's domain in Reown.
+`NEXT_PUBLIC_*` values are embedded at build time. No private key is needed.
+
+Users connect a wallet, sign in to the dashboard, then sign a second message to
+link or renew the game's session. Both signatures use the connected account;
+EOAs switch to Abstract when necessary. Changed wallets/networks and rejected
+requests stop the handshake. AGW's stored connection expiry applies only to AGW.
+The bot still runs with its encrypted game cookie, independently of the browser
+wallet. Reconnecting another wallet does not change the signed-in bot account;
+log out and sign in to change accounts.
+
+Validation: `pm test` runs Vitest/jsdom/React Testing Library wallet regressions;
+`pm exec tsc --noEmit`, `pm lint`, and `pm build` check the app. Tests mock wallet
+transports and HTTP calls. Before release, check real AGW and EOA sign-in plus
+game-session linking/renewal, account changes, reload/reconnect and WalletConnect
+mobile handoff with controlled wallets. Automated tests do not prove those live
+journeys or the production Reown domain configuration.
+
+The scoped `cuer@0.0.3>qr` override keeps WalletConnect QR rendering compatible:
+newer `qr` versions reject the zero-width border used by Cuer
+([upstream issue](https://github.com/wevm/cuer/issues/12)). The QR regression test
+executes the installed encoder through RainbowKit's dependency resolution.
+
 A modern and elegant NextJS template with advanced theme management, pre-configured UI components, and optimized for rapid professional web application development.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)

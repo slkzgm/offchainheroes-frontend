@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { abstract } from 'viem/chains'
 import { Button } from '@/components/ui/button'
 import { prepareSiwe, verifySiwe, logout as apiLogout } from '@/lib/api'
 import { useAbstractWallet } from '@/hooks/use-abstract-wallet'
@@ -26,7 +27,7 @@ export default function LandingAuthPanel() {
   } = useSession()
   const {
     address,
-    walletClient,
+    signMessage,
     isAvailable: isConnected,
     isChecking: walletChecking,
     isConnecting: walletMutationPending,
@@ -72,7 +73,6 @@ export default function LandingAuthPanel() {
     try {
       setIsConnectingWallet(true)
       await connectWallet()
-      toast.success(t('common.feedback.walletConnected'))
     } catch (error) {
       toast.error(getErrorMessage(error, t('common.errors.walletConnectFailed')))
     } finally {
@@ -97,23 +97,14 @@ export default function LandingAuthPanel() {
   }, [disconnectWallet, isAuthenticated, refetchSession, t])
 
   const handleSignIn = useCallback(async () => {
-    if (!(await revalidateWallet()) || !walletClient) {
-      toast.error(t('common.errors.connectWalletFirst'))
-      return
-    }
-
     try {
       setIsSigningIn(true)
-      const chainId = Number(await walletClient.getChainId())
-      const walletAddress = walletClient.account?.address ?? address
-
-      if (!walletAddress) {
-        throw new Error(t('common.errors.missingWalletAddress'))
+      if (!address || !(await revalidateWallet())) {
+        throw new Error(t('common.errors.connectWalletFirst'))
       }
 
-      const account = walletClient.account ?? (walletAddress as `0x${string}`)
-      const prepared = await prepareSiwe({ address: walletAddress, chainId })
-      const signature = await walletClient.signMessage({ account, message: prepared.message })
+      const prepared = await prepareSiwe({ address, chainId: abstract.id })
+      const signature = await signMessage(prepared.message)
       await verifySiwe({ message: prepared.message, signature })
       await refetchSession()
       toast.success(t('common.feedback.loginSuccess'))
@@ -122,7 +113,7 @@ export default function LandingAuthPanel() {
     } finally {
       setIsSigningIn(false)
     }
-  }, [address, walletClient, refetchSession, revalidateWallet, t])
+  }, [address, signMessage, refetchSession, revalidateWallet, t])
 
   const onWalletButtonClick = useCallback(() => {
     if (isConnected) {

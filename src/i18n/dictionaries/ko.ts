@@ -14,7 +14,7 @@ const ko = {
   common: {
     appName: '오프체인 히어로즈',
     actions: {
-      connectWallet: 'Abstract 지갑 연결',
+      connectWallet: '지갑 연결',
       disconnectWallet: '지갑 연결 해제',
       login: '앱에 로그인',
       signingIn: '로그인 중…',
@@ -38,7 +38,7 @@ const ko = {
       walletConnectFailed: '지갑 연결에 실패했습니다',
       walletDisconnectFailed: '지갑 연결 해제에 실패했습니다',
       loginFailed: '로그인에 실패했습니다',
-      connectWalletFirst: '먼저 Abstract Global Wallet을 연결하세요',
+      connectWalletFirst: '먼저 지갑을 연결하세요',
       missingWalletAddress: '연결된 지갑 주소를 찾을 수 없습니다',
       clipboardUnavailable: '클립보드를 사용할 수 없습니다',
     },
@@ -398,7 +398,7 @@ const ko = {
         linked: '세션이 성공적으로 연결되었습니다',
       },
       errors: {
-        connectWallet: '이 작업을 실행하려면 Abstract 지갑을 연결하세요.',
+        connectWallet: '이 작업을 실행하려면 지갑을 연결하세요.',
         missingWallet: '연결된 지갑 계정을 찾을 수 없습니다',
       },
     },
@@ -433,7 +433,7 @@ const ko = {
   landing: {
     header: {
       heroHeading: '자동화 대시보드에 접속하세요',
-      heroDescription: 'Abstract 지갑을 연결하고 인증하여 전략 관리와 실시간 지표를 확인해 보세요.',
+      heroDescription: 'Abstract Global Wallet 또는 Ethereum 지갑을 연결하고 로그인하여 봇을 관리하세요.',
     },
     wallet: {
       connecting: '연결 중…',

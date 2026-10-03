@@ -14,7 +14,7 @@ const ru: Messages = {
   common: {
     appName: 'Offchain Heroes',
     actions: {
-      connectWallet: 'Подключить Abstract-кошелёк',
+      connectWallet: 'Подключить кошелёк',
       disconnectWallet: 'Отключить кошелёк',
       login: 'Войти в приложение',
       signingIn: 'Вход…',
@@ -38,7 +38,7 @@ const ru: Messages = {
       walletConnectFailed: 'Не удалось подключить кошелёк',
       walletDisconnectFailed: 'Не удалось отключить кошелёк',
       loginFailed: 'Не удалось войти',
-      connectWalletFirst: 'Сначала подключите Abstract Global Wallet',
+      connectWalletFirst: 'Сначала подключите кошелёк',
       missingWalletAddress: 'Не найден адрес подключённого кошелька',
       clipboardUnavailable: 'Нет доступа к буферу обмена',
     },
@@ -401,7 +401,7 @@ const ru: Messages = {
         linked: 'Сессия успешно привязана',
       },
       errors: {
-        connectWallet: 'Подключите Abstract-кошелёк для выполнения действия.',
+        connectWallet: 'Подключите кошелёк для выполнения действия.',
         missingWallet: 'Не найден подключённый кошелёк',
       },
     },
@@ -437,7 +437,7 @@ const ru: Messages = {
     header: {
       heroHeading: 'Получите доступ к панели автоматизации',
       heroDescription:
-        'Подключите Abstract-кошелёк и авторизуйтесь, чтобы управлять стратегиями и метриками.',
+        'Подключите Abstract Global Wallet или Ethereum-кошелёк и войдите, чтобы управлять ботом.',
     },
     wallet: {
       connecting: 'Подключаем…',
