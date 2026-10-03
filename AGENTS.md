@@ -65,7 +65,7 @@ pnpm build && pnpm start       # production build + serve
 4. Accessibility first: rely on shadcn primitives (`Button`, `Label`, etc.).
 5. Auth persists via cookies—use `useSession` plus the helpers in `lib/api.ts` (`verifySiwe`, `logout`) instead of any localStorage token handling.
 6. Styling: Tailwind utility classes + `cn` helper from `lib/utils.ts`.
-7. Testing is not set up yet; document any new testing approach before adding it.
+7. Wallet regressions use Vitest with jsdom and React Testing Library (`pm test`). Mock wallet transports and API boundaries; never use real funds or production sessions in tests.
 8. Update `README.md` and this guide whenever flows or conventions change.
 
 ---
@@ -93,7 +93,7 @@ The command updates `components.json`, writes the required files under `src/comp
 ## Points of contact
 
 - Backend contract: see `backend/docs/frontend-api-guide.md`.
-- Auth: Abstract wallet flow is already wired via `AbstractProvider`.
+- Auth: `AbstractProvider` supplies Wagmi, React Query and RainbowKit for AGW and EOA wallets on Abstract. `useAbstractWallet` handles connection health and the shared wallet-bound SIWE signing path; only AGW reads Privy's connection expiry. `NEXT_PUBLIC_REOWN_PROJECT_ID` enables WalletConnect/mobile wallets at build time. Keep dashboard cookie authentication independent of browser connection expiry, and enforce its wallet identity when renewing a game session.
 - Scheduling / bot data: consumed through `/bot/config`, `/bot/state`, `/bot/logs`.
 
 Keep this document concise but authoritative. If you find yourself answering the same question twice, add the answer here.

@@ -12,7 +12,7 @@ const en = {
   common: {
     appName: 'Offchain Heroes',
     actions: {
-      connectWallet: 'Connect Abstract Wallet',
+      connectWallet: 'Connect wallet',
       disconnectWallet: 'Disconnect wallet',
       login: 'Login to app',
       signingIn: 'Signing in…',
@@ -36,7 +36,7 @@ const en = {
       walletConnectFailed: 'Failed to connect wallet',
       walletDisconnectFailed: 'Failed to disconnect wallet',
       loginFailed: 'Failed to login',
-      connectWalletFirst: 'Connect Abstract Global Wallet first',
+      connectWalletFirst: 'Connect your wallet first',
       missingWalletAddress: 'No connected wallet address found',
       clipboardUnavailable: 'Clipboard access unavailable',
     },
@@ -398,7 +398,7 @@ const en = {
         linked: 'Session linked successfully',
       },
       errors: {
-        connectWallet: 'Connect your Abstract wallet to perform this action.',
+        connectWallet: 'Connect your wallet to perform this action.',
         missingWallet: 'No connected wallet account found',
       },
     },
@@ -434,7 +434,7 @@ const en = {
     header: {
       heroHeading: 'Access your automation dashboard',
       heroDescription:
-        'Connect your Abstract wallet, then authenticate to unlock strategy management and live metrics.',
+        'Connect an Abstract Global Wallet or an Ethereum wallet, then sign in to manage your bot.',
     },
     wallet: {
       connecting: 'Connecting…',

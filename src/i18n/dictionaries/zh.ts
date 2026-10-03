@@ -12,7 +12,7 @@ const zh: Messages = {
   common: {
     appName: 'Offchain Heroes',
     actions: {
-      connectWallet: '连接 Abstract 钱包',
+      connectWallet: '连接钱包',
       disconnectWallet: '断开钱包',
       login: '登录控制台',
       signingIn: '登录中…',
@@ -36,7 +36,7 @@ const zh: Messages = {
       walletConnectFailed: '连接钱包失败',
       walletDisconnectFailed: '断开钱包失败',
       loginFailed: '登录失败',
-      connectWalletFirst: '请先连接 Abstract Global Wallet',
+      connectWalletFirst: '请先连接钱包',
       missingWalletAddress: '未找到已连接的钱包地址',
       clipboardUnavailable: '无法访问剪贴板',
     },
@@ -389,7 +389,7 @@ const zh: Messages = {
         linked: '会话连接成功',
       },
       errors: {
-        connectWallet: '请连接 Abstract 钱包后再执行此操作。',
+        connectWallet: '请连接钱包后再执行此操作。',
         missingWallet: '未找到已连接的钱包账户',
       },
     },
@@ -424,7 +424,7 @@ const zh: Messages = {
   landing: {
     header: {
       heroHeading: '访问你的自动化控制台',
-      heroDescription: '连接 Abstract 钱包并完成认证，解锁策略管理与实时数据。',
+      heroDescription: '连接 Abstract Global Wallet 或 Ethereum 钱包并登录，即可管理机器人。',
     },
     wallet: {
       connecting: '正在连接…',

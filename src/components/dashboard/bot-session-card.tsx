@@ -38,7 +38,7 @@ export function BotSessionCard({
 }: BotSessionCardProps) {
   const {
     address,
-    walletClient,
+    signMessage,
     isAvailable: walletAvailable,
     isChecking: walletChecking,
     isConnected,
@@ -98,19 +98,13 @@ export function BotSessionCard({
   }, [status, t])
 
   const handleLinkSession = useCallback(async () => {
-    if (!(await revalidateWallet()) || !walletClient || !walletMatchesSession) {
-      toast.error(t('dashboard.session.errors.connectWallet'))
-      return
-    }
-
     try {
       setIsProcessing(true)
-      const prepared = await prepareBotSession()
-      const account = walletClient.account ?? (address as `0x${string}` | undefined)
-      if (!account) {
-        throw new Error(t('dashboard.session.errors.missingWallet'))
+      if (!(await revalidateWallet()) || !walletMatchesSession) {
+        throw new Error(t('dashboard.session.errors.connectWallet'))
       }
-      const signature = await walletClient.signMessage({ account, message: prepared.message })
+      const prepared = await prepareBotSession()
+      const signature = await signMessage(prepared.message)
       await verifyBotSession({ message: prepared.message, signature })
       toast.success(
         hasSessionCookie
@@ -125,12 +119,11 @@ export function BotSessionCard({
       setIsProcessing(false)
     }
   }, [
-    address,
     hasSessionCookie,
     onSessionUpdated,
     revalidateWallet,
     t,
-    walletClient,
+    signMessage,
     walletMatchesSession,
   ])
 
@@ -138,13 +131,12 @@ export function BotSessionCard({
     try {
       setIsProcessing(true)
       await connectWallet({ force: isConnected && !walletMatchesSession })
-      toast.success(t('common.feedback.walletConnected'))
     } catch (error) {
       toast.error(getErrorMessage(error))
     } finally {
       setIsProcessing(false)
     }
-  }, [connectWallet, isConnected, t, walletMatchesSession])
+  }, [connectWallet, isConnected, walletMatchesSession])
 
   const sessionActionLabel = hasSessionCookie
     ? t('dashboard.session.actions.renew')
